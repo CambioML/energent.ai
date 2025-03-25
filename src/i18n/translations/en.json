@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "Todo App"
+  },
+  "todo": {
+    "addTodo": "Add a new task...",
+    "placeholder": "Add a new task...",
+    "noTodos": "No todos yet. Add some!",
+    "add": "Add"
+  },
+  "login": {
+    "titleLine1": "Command Machine",
+    "titleLine2": "With the Power of AI",
+    "subtitle": "Energent.ai lets you control your computer with natural language, automating tasks and simplifying workflows through our powerful AI agent interface.",
+    "mobileSubtitle": "Control your computer with natural language through powerful AI assistants.",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "errorRequired": "Please enter both email and password",
+    "errorInvalid": "Invalid email or password",
+    "signingIn": "Signing in...",
+    "continueAsGuest": "Continue as Guest",
+    "aiPowered": "AI-Powered",
+    "fastSecure": "Fast & Secure",
+    "termsAgreement": "I agree with the",
+    "termsAndConditions": "Terms & Conditions",
+    "andRead": "and have read the",
+    "privacyPolicy": "Privacy Policy",
+    "termsError": "You must agree to the Terms & Conditions",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signInButton": "Sign in",
+    "forgotPassword": "Forgot your password?",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "confirmPassword": "Confirm your password",
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "agent": {
+    "title": "Energent.ai Agent",
+    "greeting": "Hello! I am your AI assistant. How can I help you today?",
+    "placeholder": "Type your message here...",
+    "clearConversation": "Clear conversation",
+    "logout": "Logout",
+    "computerControl": "Assistant can control your computer and execute commands"
+  }
+}

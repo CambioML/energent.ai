@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "待办事项"
+  },
+  "todo": {
+    "addTodo": "添加新任务...",
+    "placeholder": "添加新任务...",
+    "noTodos": "暂无待办事项。添加一些吧！",
+    "add": "添加"
+  },
+  "login": {
+    "titleLine1": "运用AI的强大能力",
+    "titleLine2": "控制计算机",
+    "subtitle": "Energent.ai让您可以使用自然语言控制计算机，通过我们强大的AI代理界面自动执行任务并简化工作流程。",
+    "mobileSubtitle": "通过强大的AI助手使用自然语言控制您的计算机。",
+    "email": "电子邮箱",
+    "password": "密码",
+    "loginButton": "登录",
+    "errorRequired": "请输入电子邮箱和密码",
+    "errorInvalid": "电子邮箱或密码无效",
+    "signingIn": "登录中...",
+    "continueAsGuest": "以访客身份继续",
+    "aiPowered": "AI驱动",
+    "fastSecure": "快速安全",
+    "termsAgreement": "我同意",
+    "termsAndConditions": "条款和条件",
+    "andRead": "并已阅读",
+    "privacyPolicy": "隐私政策",
+    "termsError": "您必须同意条款和条件",
+    "signIn": "登录",
+    "signUp": "注册",
+    "signInButton": "登录",
+    "forgotPassword": "忘记密码？",
+    "enterEmail": "输入您的电子邮箱",
+    "enterPassword": "输入您的密码",
+    "confirmPassword": "确认您的密码",
+    "signInWithGoogle": "使用Google登录"
+  },
+  "agent": {
+    "title": "Energent.ai 助手",
+    "greeting": "你好！我是你的AI助手。今天我能帮你做什么？",
+    "placeholder": "在这里输入你的消息...",
+    "clearConversation": "清空对话",
+    "logout": "退出登录",
+    "computerControl": "助手可以控制您的计算机并执行命令"
+  }
+} 

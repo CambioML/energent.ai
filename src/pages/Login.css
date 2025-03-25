@@ -1,0 +1,8 @@
+/* Custom overrides for Amplify UI components */
+
+/* Remove border from authenticator component */
+[data-amplify-authenticator] [data-amplify-router] {
+  border-width: 0 !important;
+  border-style: none !important;
+  box-shadow: none !important;
+} 
