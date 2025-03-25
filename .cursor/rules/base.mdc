@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+In this project we're using shadcn, Tailwind 4. Make sure you're using the current syntax, before you write code, search on the Web for it.
+
+We're making a reall modern application. Your code MUST have animation with framer-motion, and buttons should have icons from lucide-react.
