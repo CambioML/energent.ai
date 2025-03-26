@@ -2,12 +2,6 @@ const keys = {
   app: {
     title: "app.title"
   },
-  todo: {
-    addTodo: "todo.addTodo",
-    placeholder: "todo.placeholder",
-    noTodos: "todo.noTodos",
-    add: "todo.add"
-  },
   login: {
     titleLine1: "login.titleLine1",
     titleLine2: "login.titleLine2",

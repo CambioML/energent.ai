@@ -4,6 +4,17 @@ import { PostHogProvider } from 'posthog-js/react'
 import App from './App.tsx'
 import posthog from 'posthog-js'
 import './index.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+})
 
 // Initialize PostHog with a default configuration
 // This should be replaced with your actual PostHog key from environment
@@ -24,8 +35,10 @@ posthog.init(
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PostHogProvider client={posthog}>
-      <App />
-    </PostHogProvider>
+    <QueryClientProvider client={queryClient}>
+      <PostHogProvider client={posthog}>
+        <App />
+      </PostHogProvider>
+    </QueryClientProvider>
   </StrictMode>,
 )

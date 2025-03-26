@@ -23,7 +23,6 @@ i18n
       }
     },
     fallbackLng: 'en',
-    debug: true,
     interpolation: {
       escapeValue: false // React already safes from XSS
     }

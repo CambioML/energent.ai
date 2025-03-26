@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ChatAPI } from '../api';
+import { ChatAPI } from '../api/chat-api';
 
 export interface Message {
   id: string;
@@ -8,7 +8,7 @@ export interface Message {
   timestamp: number;
   conversationId: string;
   references?: any[];
-  feedback?: 'positive' | 'negative';
+  feedback?: 'good' | 'bad';
 }
 
 export interface Conversation {
@@ -22,7 +22,6 @@ interface ChatState {
   conversations: Conversation[];
   currentConversationId: string | null;
   messages: Message[];
-  isLoading: boolean;
   isTyping: boolean;
   error: string | null;
   
@@ -32,7 +31,6 @@ interface ChatState {
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
   updateMessage: (id: string, updates: Partial<Message>) => void;
-  setIsLoading: (isLoading: boolean) => void;
   setIsTyping: (isTyping: boolean) => void;
   setError: (error: string | null) => void;
   
@@ -41,23 +39,15 @@ interface ChatState {
   fetchConversation: (conversationId: string) => Promise<void>;
   createConversation: (summary?: string) => Promise<string>;
   deleteConversation: (conversationId: string) => Promise<void>;
-  sendMessage: (content: string, file?: File) => Promise<void>;
-  sendFeedback: (messageId: string, feedback: 'positive' | 'negative', additionalFeedback?: string) => Promise<void>;
+  sendMessage: (content: string) => Promise<void>;
+  sendFeedback: (messageId: string, feedback: 'good' | 'bad') => Promise<void>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
   // Initial state
   conversations: [],
-  currentConversationId: '4e76fb63-342f-472e-baf8-4ffa440c416f',
-  messages: [{
-    id: '1',
-    content: 'Hi, I am the AI assistant for this chat. How can I help you today?',
-    isBot: true,
-    timestamp: Date.now(),
-    conversationId: '4e76fb63-342f-472e-baf8-4ffa440c416f',
-    references: [],
-  }],
-  isLoading: false,
+  currentConversationId: null,
+  messages: [],
   isTyping: false,
   error: null,
   
@@ -73,14 +63,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       msg.id === id ? { ...msg, ...updates } : msg
     )
   })),
-  setIsLoading: (isLoading) => set({ isLoading }),
   setIsTyping: (isTyping) => set({ isTyping }),
   setError: (error) => set({ error }),
   
   // API actions
   fetchConversations: async () => {
-    const { setConversations, setIsLoading, setError } = get();
-    setIsLoading(true);
+    const { setError, setConversations, setCurrentConversationId } = get();
     setError(null);
     try {
       const data = await ChatAPI.getConversations();
@@ -90,17 +78,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
         timestamp: conv.timestamp || conv.CreatedAt || Date.now(),
       }));
       setConversations(conversations);
+      setCurrentConversationId(conversations[0].id);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       setError('Failed to load conversations');
-    } finally {
-      setIsLoading(false);
     }
   },
   
   fetchConversation: async (conversationId) => {
-    const { setMessages, setIsLoading, setError } = get();
-    setIsLoading(true);
+    const { setMessages, setError } = get();
     setError(null);
     try {
       const data = await ChatAPI.getConversation(conversationId);
@@ -114,36 +100,31 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       setMessages(messages);
     } catch (error) {
-    // TODO: Remove this once we have a real conversation ID
-    //   console.error('Error fetching conversation:', error);
-    //   setError('Failed to load conversation history');
-    } finally {
-      setIsLoading(false);
+      console.error('Error fetching conversation:', error);
+      setError('Failed to load conversation history');
     }
   },
   
   createConversation: async (summary = 'New Task') => {
-    const { setIsLoading, setError, fetchConversations, setCurrentConversationId } = get();
-    setIsLoading(true);
+    const { setError, fetchConversations, setCurrentConversationId } = get();
     setError(null);
     try {
       const data = await ChatAPI.createConversation(summary);
       const conversationId = data.result.conversationId;
+
       await fetchConversations();
       setCurrentConversationId(conversationId);
+
       return conversationId;
     } catch (error) {
       console.error('Error creating conversation:', error);
       setError('Failed to create new conversation');
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   },
   
   deleteConversation: async (conversationId) => {
-    const { setIsLoading, setError, fetchConversations, currentConversationId, setCurrentConversationId } = get();
-    setIsLoading(true);
+    const { setError, fetchConversations, currentConversationId, setCurrentConversationId } = get();
     setError(null);
     try {
       await ChatAPI.deleteConversation(conversationId);
@@ -156,12 +137,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } catch (error) {
       console.error('Error deleting conversation:', error);
       setError('Failed to delete conversation');
-    } finally {
-      setIsLoading(false);
     }
   },
   
-  sendMessage: async (content, file) => {
+  sendMessage: async (content) => {
     const { currentConversationId, addMessage, setIsTyping, setError } = get();
     
     if (!currentConversationId) {
@@ -184,7 +163,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       setIsTyping(true);
       
       // Send message to API
-      const response = await ChatAPI.sendMessage(currentConversationId, content, file);
+      const response = await ChatAPI.sendMessage(currentConversationId, content);
       const messageId = response.result;
       
       // Poll for streaming response
@@ -196,14 +175,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
         if (result.completed) {
           completed = true;
           
+          // Extract data from the response
+          const generatedResult = result.result['Generated Result'];
+          const references = result.result.References || [];
+          
           // Add bot response
           const botMessage: Message = {
             id: messageId,
-            content: result.result['Generated Result'],
+            content: generatedResult,
             isBot: true,
             timestamp: Date.now(),
             conversationId: currentConversationId,
-            references: result.result.References || [],
+            references: references,
           };
           addMessage(botMessage);
         }
@@ -219,7 +202,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
   
-  sendFeedback: async (messageId, feedback, additionalFeedback) => {
+  sendFeedback: async (messageId, feedback) => {
     const { currentConversationId, updateMessage, setError } = get();
     
     if (!currentConversationId) {
@@ -228,7 +211,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
     
     try {
-      await ChatAPI.sendFeedback(currentConversationId, messageId, feedback, additionalFeedback);
+      await ChatAPI.sendFeedback(currentConversationId, messageId, feedback);
       updateMessage(messageId, { feedback });
     } catch (error) {
       console.error('Error sending feedback:', error);

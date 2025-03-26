@@ -74,9 +74,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+* {
+  overscroll-behavior-y: contain;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    overscroll-behavior-y: contain;
   }
   body {
     @apply bg-background text-foreground;

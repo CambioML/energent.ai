@@ -1,34 +1,19 @@
-import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAgentStore } from '@/lib/store/agent';
-
-type StatusType = 'Starting' | 'Running' | 'Ready';
+import { useAgentStore, AgentStatus } from '@/lib/store/agent';
 
 export default function StatusIndicator() {
-  const { agentId, isAgentLoading } = useAgentStore();
-  const [status, setStatus] = useState<StatusType>(isAgentLoading ? 'Starting' : 'Running');
-
-  useEffect(() => {
-    // For demo purposes: When agent is no longer loading and has an ID, 
-    // we'll consider it ready. Otherwise follow the loading state.
-    if (!isAgentLoading && agentId) {
-      setStatus('Ready');
-    } else if (isAgentLoading) {
-      setStatus('Starting');
-    } else {
-      setStatus('Running');
-    }
-  }, [isAgentLoading, agentId]);
+  const { status } = useAgentStore();
 
   // Function to determine the color of the status indicator
   const getStatusColor = () => {
     switch (status) {
-      case 'Starting': return 'bg-amber-500';
-      case 'Running': return 'bg-green-500';
-      case 'Ready': return 'bg-blue-500';
+      case AgentStatus.Starting: return 'bg-amber-500';
+      case AgentStatus.Running: return 'bg-green-500';
+      case AgentStatus.Ready: return 'bg-blue-500';
+      case AgentStatus.Error: return 'bg-red-500';
       default: return 'bg-green-500';
     }
   };
@@ -48,9 +33,10 @@ export default function StatusIndicator() {
           <Activity className="h-4 w-4" />
           <span>Status:</span>
           <span className={cn("font-medium", {
-            "text-amber-500": status === 'Starting',
-            "text-green-500": status === 'Running',
-            "text-blue-500": status === 'Ready'
+            "text-amber-500": status === AgentStatus.Starting,
+            "text-green-500": status === AgentStatus.Running,
+            "text-blue-500": status === AgentStatus.Ready,
+            "text-red-500": status === AgentStatus.Error
           })}>
             {status}
           </span>

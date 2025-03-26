@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { usePostHog } from 'posthog-js/react';
 import { Rocket, Cpu, BrainCircuit } from 'lucide-react';
 import { ThemeProvider, CheckboxField, useAuthenticator, Authenticator } from '@aws-amplify/ui-react';
+import { fetchAuthSession } from 'aws-amplify/auth';
+import axios from 'axios';
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +14,8 @@ import { Loading } from "@/components/ui/loading";
 
 import { getFormFields } from '@/i18n';
 import { customTheme } from '@/config/amplify';
+import { Endpoint } from '@/lib/api/endpoints';
+import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
 import keys from '@/i18n/keys';
 
 import '@aws-amplify/ui-react/styles.css';
@@ -20,10 +24,41 @@ import '@/config/amplify';
 // Custom CSS to override Amplify UI styles
 import './Login.css';
 
+const authenticateResource = async (idToken: string) => {
+  try {
+    const response = await axios.post(
+      Endpoint.login,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (err: any) {
+    console.log(err);
+    return Promise.reject(err.response?.data || err);
+  }
+};
+
+interface AuthSignInDetails {
+  tokens?: {
+    idToken: string;
+  };
+  loginId?: string;
+}
+
+interface AuthUser {
+  userId: string;
+  username?: string;
+  signInDetails?: AuthSignInDetails;
+}
+
 export default function Login() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuthenticator(context => [context.user]);
+  const { user } = useAuthenticator((context) => [context.user]) as { user: AuthUser };
   const posthog = usePostHog();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,19 +66,16 @@ export default function Login() {
 
   // Update form fields and Amplify translations when language changes
   useEffect(() => {
-    console.log('Language changed to:', i18n.language);
-    console.log(
-      getFormFields()
-    )
     setFormFields(getFormFields());
   }, [i18n.language]);
 
   // Handle successful authentication
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
     if (!user) return;
     
     try {
       setLoading(true);
+      
       // Get user info from the authenticated user
       const userInfo = user.signInDetails?.loginId 
         ? { email: user.signInDetails.loginId } 
@@ -52,22 +84,44 @@ export default function Login() {
       const userName = userInfo.email.split('@')[0];
       
       // Store relevant user info in local storage
-      localStorage.setItem('user_email', userInfo.email);
-      localStorage.setItem('user_name', userName);
+      setLocalStorage(LocalStorageKey.UserInfo, JSON.stringify({
+        user_name: userName,
+        user_email: userInfo.email
+      }));
       
-      // For Auth tokens, we don't have direct access to them in the new API
-      // Instead we need to use Auth API to get the current session if needed
+      // Get the current session to access tokens
+      const { tokens } = await fetchAuthSession();
       
-      // Identify user in PostHog
-      posthog?.identify(user.userId, {
-        email: userInfo.email,
-        name: userName
-      });
-      
-      // Navigate to the agent page
-      setTimeout(() => {
-        navigate('/agent');
-      }, 1000);
+      if (tokens?.idToken) {
+        try {
+          const authResponse = await authenticateResource(tokens.idToken.toString());
+          
+          // Store the token
+          setLocalStorage(LocalStorageKey.Token, authResponse.token);
+          setLocalStorage(LocalStorageKey.UserID, authResponse.user_id);
+          
+          // Identify user in PostHog
+          if (process.env.NODE_ENV === 'development') {
+            posthog?.identify(`dev_${authResponse.user_id}`);
+          } else {
+            posthog?.identify(authResponse.user_id);
+          }
+
+          // Set logged in state
+          setLocalStorage(LocalStorageKey.LoggedIn, 'true');
+          
+          // Navigate to the agent page
+          setTimeout(() => {
+            navigate('/agent');
+          }, 1000);
+        } catch (err) {
+          console.error('Resource authentication error:', err);
+          setError('Failed to authenticate with the resource server. Please try again.');
+          setLoading(false);
+        }
+      } else {
+        throw new Error('No ID token available');
+      }
     } catch (err) {
       console.error('Authentication error:', err);
       setError('Failed to authenticate. Please try again.');
@@ -195,10 +249,16 @@ export default function Login() {
                         }}
                         hideSignUp
                       >
-                        {() => (
-                          <div className="hidden">
-                            {/* This is here to satisfy the Authenticator component requirement */}
-                          </div>
+                        {({ user }) => (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            <div className="w-full">
+                              <p>{user?.username}</p>
+                              <p>Is signing in...</p>
+                            </div>
+                          </motion.div>
                         )}
                       </Authenticator>
                     </ThemeProvider>

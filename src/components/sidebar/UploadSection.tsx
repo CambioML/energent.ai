@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useSidebarStore } from "@/lib/store/sidebar";
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +18,7 @@ interface UploadedFile extends File {
 }
 
 export const UploadSection = () => {
+  const { expandedAccordions, toggleAccordion } = useSidebarStore();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -94,12 +96,24 @@ export const UploadSection = () => {
   };
 
   return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="file-upload">
-        <AccordionTrigger className="flex items-center gap-3 p-4 border-b">
-          <Upload size={22} className="text-primary shrink-0" />
-          <h3 className="text-lg font-medium">File Upload</h3>
-        </AccordionTrigger>
+    <Accordion 
+      type="single" 
+      collapsible 
+      className="w-full" 
+      defaultValue={expandedAccordions.upload ? "upload" : undefined}
+      onValueChange={(value) => {
+        if (value === "upload" || value === undefined) {
+          toggleAccordion("upload");
+        }
+      }}
+    >
+      <AccordionItem value="upload" className="border-0">
+        <div className="flex items-center gap-3 p-4 border-b">
+          <Upload size={20} className="text-primary shrink-0" />
+          <AccordionTrigger className="flex-1 flex justify-center items-center p-0 hover:no-underline">
+            <h3 className="text-lg font-medium">File Upload</h3>
+          </AccordionTrigger>
+        </div>
         <AccordionContent>
           {files.length === 0 && (
             <div className="flex flex-col gap-4 p-4">
@@ -147,7 +161,7 @@ export const UploadSection = () => {
                 </Button>
               </div>
 
-              <div className="space-y-2 max-h-[10vh] overflow-y-auto pr-2">
+              <div className="space-y-2 pr-2">
                   {files.map((file, index) => (
                     <motion.div
                       key={`${file.name}-${index}`}
