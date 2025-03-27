@@ -6,7 +6,7 @@ import { NewTaskModal } from '@/components/chat/NewTaskModal';
 
 export default function Agent() {
   return (
-    <div className="min-h-[calc(100vh-73px)] flex flex-col bg-background">
+    <div className="min-h-[calc(100vh-73px)] max-h-[calc(100vh-73px)] overflow-hidden flex flex-col bg-background">
       {/* Sidebar */}
       <Sidebar />
       

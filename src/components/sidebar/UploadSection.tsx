@@ -1,4 +1,4 @@
-import { Upload, Plus, FileText, X } from "lucide-react";
+import { Upload, Plus, FileText, X, FileWarning } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -6,21 +6,29 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useSidebarStore } from "@/lib/store/sidebar";
+import { ChatAPI } from "@/lib/api/chat-api";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
+import { useAgentStore } from "@/lib/store/agent";
 interface UploadedFile extends File {
   preview?: string;
 }
 
+// Allowed file extensions from the API
+const ALLOWED_EXTENSIONS = ["pdf", "doc", "docx", "txt", "png", "jpg", "jpeg"];
+// Max file size from the API (10MB)
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 export const UploadSection = () => {
+  const { agentId } = useAgentStore();
   const { expandedAccordions, toggleAccordion } = useSidebarStore();
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+
   const [uploading, setUploading] = useState(false);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     // Create preview URLs for image files
@@ -48,14 +56,14 @@ export const UploadSection = () => {
       toast.error("Error uploading files: " + (fileRejections[0].errors[0].message));
     },
     accept: {
-      "image/*": [],
-      "application/pdf": [],
-      "text/plain": [],
-      "application/msword": [],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [],
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "application/pdf": [".pdf"],
+      "text/plain": [".txt"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
     },
-    maxSize: 50 * 1024 * 1024, // 50MB
+    maxSize: MAX_FILE_SIZE,
   });
 
   const removeFile = (index: number) => {
@@ -70,24 +78,66 @@ export const UploadSection = () => {
     });
   };
 
+  const validateFileType = (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    return ALLOWED_EXTENSIONS.includes(ext);
+  };
+
   const handleUpload = async () => {
     if (files.length === 0) return;
+    
+    if (!agentId) {
+      toast.error("Agent ID is required for upload");
+      return;
+    }
 
     setUploading(true);
-    const toastId = toast.loading("Uploading files...");
+    const toastId = toast.loading(`Uploading ${files.length} files...`);
 
-    // TODO: Replace with actual upload logic
     try {
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Track successful and failed uploads
+      let successCount = 0;
+      let failCount = 0;
 
-      // After successful upload, clear the files
+      // Upload each file
+      for (const file of files) {
+        // Validate file type
+        if (!validateFileType(file)) {
+          toast.error(`Invalid file type: ${file.name}. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}`);
+          failCount++;
+          continue;
+        }
+
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`File too large: ${file.name}. Maximum size: 10MB`);
+          failCount++;
+          continue;
+        }
+
+        // Upload the file
+        const result = await ChatAPI.uploadFile(file, agentId);
+        
+        if (result.success) {
+          successCount++;
+        } else {
+          failCount++;
+          console.error(`Failed to upload ${file.name}: ${result.message}`);
+        }
+      }
+
+      // Clear files after upload attempt
       setFiles([]);
 
-      // Success notification
-      toast.success("Files uploaded successfully", { id: toastId });
+      // Show appropriate notification
+      if (successCount > 0 && failCount === 0) {
+        toast.success(`Successfully uploaded ${successCount} file(s)`, { id: toastId });
+      } else if (successCount > 0 && failCount > 0) {
+        toast.success(`Uploaded ${successCount} file(s), ${failCount} failed`, { id: toastId });
+      } else {
+        toast.error(`Failed to upload files`, { id: toastId });
+      }
     } catch (error) {
-      // Error handling with toast notification
       toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"), { id: toastId });
       console.error("Upload failed:", error);
     } finally {
@@ -134,10 +184,13 @@ export const UploadSection = () => {
                     isDragActive ? "text-primary animate-bounce" : "text-primary"
                   )}
                 />
-                <p className="text-sm text-center mb-4">
+                <p className="text-sm text-center mb-2">
                   {isDragActive
                     ? "Drop files here..."
                     : "Drag & drop files here or click to browse"}
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG (max 10MB)
                 </p>
                 <Button className="gap-2">
                   <Plus size={16} />
@@ -162,47 +215,66 @@ export const UploadSection = () => {
               </div>
 
               <div className="space-y-2 pr-2">
-                  {files.map((file, index) => (
-                    <motion.div
-                      key={`${file.name}-${index}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="flex items-center justify-between p-2 bg-card rounded-md border"
-                    >
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        {file.preview ? (
-                          <img
-                            src={file.preview}
-                            alt={file.name}
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                        ) : (
-                          <FileText size={20} className="text-primary" />
+                  {files.map((file, index) => {
+                    const isValidType = validateFileType(file);
+                    const isValidSize = file.size <= MAX_FILE_SIZE;
+                    const isValid = isValidType && isValidSize;
+                    
+                    return (
+                      <motion.div
+                        key={`${file.name}-${index}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className={cn(
+                          "flex items-center justify-between p-2 bg-card rounded-md border",
+                          !isValid && "border-red-500 bg-red-50 dark:bg-red-950/20"
                         )}
-                        <span className="text-sm truncate">{file.name}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile(index);
-                        }}
-                        disabled={uploading}
-                        className="h-7 w-7"
                       >
-                        <X size={14} />
-                      </Button>
-                    </motion.div>
-                  ))}
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          {file.preview ? (
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              className="h-8 w-8 rounded object-cover"
+                            />
+                          ) : isValid ? (
+                            <FileText size={20} className="text-primary" />
+                          ) : (
+                            <FileWarning size={20} className="text-red-500" />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-sm truncate">{file.name}</span>
+                            {!isValid && (
+                              <span className="text-xs text-red-500">
+                                {!isValidType && "Invalid file type"}
+                                {!isValidSize && "File too large (max 10MB)"}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(index);
+                          }}
+                          disabled={uploading}
+                          className="h-7 w-7"
+                        >
+                          <X size={14} />
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
               </div>
 
               <Button
                 className="w-full mt-4"
                 onClick={handleUpload}
-                disabled={uploading || files.length === 0}
+                disabled={uploading || files.length === 0 || !agentId}
               >
                 {uploading ? "Uploading..." : "Upload Files"}
               </Button>

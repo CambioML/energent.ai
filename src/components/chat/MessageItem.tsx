@@ -4,7 +4,7 @@ import { Message } from "@/lib/store/chat";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ThumbsUp, ThumbsDown, User, Bot, Copy, Share2, Pencil, Check, X } from "lucide-react";
+import { ThumbsUp, ThumbsDown, User, Bot, Copy, Share2, Pencil, Check, X, Loader2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +30,7 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
   const [isCopied, setIsCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
+  const [isSaving, setIsSaving] = useState(false);
   const { updateMessage } = useChatStore();
 
   // Reset copy state after 2 seconds
@@ -71,15 +72,23 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
     setEditedContent(message.content);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editedContent.trim() === "") {
       toast.error("Message cannot be empty");
       return;
     }
     
-    updateMessage(message.id, { content: editedContent.trim() });
-    setIsEditing(false);
-    toast.success("Message edited");
+    try {
+      setIsSaving(true);
+      await updateMessage(message.id, { content: editedContent.trim() });
+      setIsEditing(false);
+      toast.success("Message updated");
+    } catch (error) {
+      console.error("Error updating message:", error);
+      toast.error("Failed to update message");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -116,6 +125,7 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
               onChange={(e) => setEditedContent(e.target.value)}
               className="focus:border-primary"
               placeholder="Edit your message..."
+              disabled={isSaving}
             />
             <div className="flex justify-end gap-2">
               <Button
@@ -123,6 +133,7 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
                 size="sm"
                 onClick={handleCancel}
                 className="flex items-center gap-1"
+                disabled={isSaving}
               >
                 <X size={14} />
                 Cancel
@@ -132,9 +143,19 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
                 size="sm"
                 onClick={handleSave}
                 className="flex items-center gap-1"
+                disabled={isSaving}
               >
-                <Check size={14} />
-                Save
+                {isSaving ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Check size={14} />
+                    Save
+                  </>
+                )}
               </Button>
             </div>
           </div>

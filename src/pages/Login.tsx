@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePostHog } from 'posthog-js/react';
-import { Rocket, Cpu, BrainCircuit } from 'lucide-react';
+import { Rocket, BrainCircuit } from 'lucide-react';
 import { ThemeProvider, CheckboxField, useAuthenticator, Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import axios from 'axios';
@@ -169,7 +169,6 @@ export default function Login() {
                 <Card className="border shadow-md">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-center gap-3 mb-6 pt-4">
-                      <Cpu className="h-10 w-10 text-primary" />
                       <h2 className="text-2xl font-bold">
                         Energent.ai
                       </h2>

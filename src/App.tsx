@@ -10,9 +10,13 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getAnonymousToken, getIdToken, LocalStorageKey, LocalStoragePrefix, setLocalStorage } from './lib/utils/local-storage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useOnLogin } from './lib/hooks/useOnLogin';
 import './i18n';
 
 function AppContent() {
+  // Initialize agent on login
+  useOnLogin();
+
   // Axios interceptors
   axios.interceptors.request.use(
     (config) => {
@@ -20,7 +24,7 @@ function AppContent() {
         return config;
       }
 
-      const token = import.meta.env.VITE_TOKEN || getIdToken();
+      const token = getIdToken();
       config.headers['Authorization'] = 'Bearer ' + token || getAnonymousToken();
 
       if (!config.headers['Content-Type']) {
@@ -86,14 +90,12 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/agent" element={<Agent />} />
-          <Route path="/history/:conversationId" element={<RecordingReplay />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/agent" element={<Agent />} />
+        <Route path="/history/:conversationId" element={<RecordingReplay />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <Toaster />
     </div>
   );

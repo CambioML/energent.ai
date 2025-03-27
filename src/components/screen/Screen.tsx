@@ -12,11 +12,12 @@ export default function Screen() {
   const { agentId, status, setStatus, resetAgent } = useAgentStore();
 
   // Use React Query to poll for agent status
-  const { data, error, isError } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ['agentStatus', agentId],
-    queryFn: AgentAPI.getAgentStatus,
+    queryFn: () => AgentAPI.getAgentStatus(agentId),
     refetchInterval: status !== AgentStatus.Ready && status !== AgentStatus.Error ? 1000 : false, // Poll every second until Ready
     refetchIntervalInBackground: true,
+    enabled: !!agentId,
   });
 
   // Update status when data changes or error occurs

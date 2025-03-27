@@ -1,7 +1,6 @@
-import { Cpu } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import LanguageSwitcher from './LanguageSwitcher';
 import { motion } from 'framer-motion';
+import LanguageSwitcher from './LanguageSwitcher';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Header() {
   const location = useLocation();
@@ -30,7 +29,6 @@ export default function Header() {
         className="z-[10]"
       >
         <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-          <Cpu className="h-6 w-6" />
           <span className="font-semibold text-xl">Energent.ai</span>
         </Link>
       </motion.div>
