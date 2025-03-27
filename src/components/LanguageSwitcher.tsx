@@ -62,13 +62,14 @@ export default function LanguageSwitcher() {
                   {i18n.language === 'en' && <Check className="h-4 w-4" />}
                   <span className={i18n.language === 'en' ? "font-medium" : ""}>English</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                {/* TODO: Only support English for now */}
+                {/* <DropdownMenuItem 
                   onClick={() => changeLanguage('zh')}
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   {i18n.language === 'zh' && <Check className="h-4 w-4" />}
                   <span className={i18n.language === 'zh' ? "font-medium" : ""}>中文</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </motion.div>
             </DropdownMenuContent>
           )}

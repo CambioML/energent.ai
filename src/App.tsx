@@ -11,6 +11,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getAnonymousToken, getIdToken, LocalStorageKey, LocalStoragePrefix, setLocalStorage } from './lib/utils/local-storage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useOnLogin } from './lib/hooks/useOnLogin';
+import { ThemeProvider } from './components/theme-provider';
 import './i18n';
 
 function AppContent() {
@@ -103,13 +104,15 @@ function AppContent() {
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID as string}>
-      <Authenticator.Provider>
-        <Router>
-          <AppContent />
-        </Router>
-      </Authenticator.Provider>
-    </GoogleOAuthProvider>
+    <ThemeProvider defaultTheme="light">
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID as string}>
+        <Authenticator.Provider>
+          <Router>
+            <AppContent />
+          </Router>
+        </Authenticator.Provider>
+      </GoogleOAuthProvider>
+    </ThemeProvider>
   );
 }
 

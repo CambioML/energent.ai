@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Link, useLocation } from 'react-router-dom';
+import { ModeToggle } from './mode-toggle';
 
 export default function Header() {
   const location = useLocation();
@@ -33,13 +34,13 @@ export default function Header() {
         </Link>
       </motion.div>
       
-      {/* Language Switcher */}
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="z-[10]"
+        className="z-[10] flex items-center gap-4"
       >
+        <ModeToggle />
         <LanguageSwitcher />
       </motion.div>
     </div>

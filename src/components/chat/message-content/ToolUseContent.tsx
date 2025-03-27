@@ -141,12 +141,12 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
   
   return (
     <div className="bg-secondary/40 rounded-md px-2 pt-2 flex flex-col gap-2 text-sm shadow-xs border mt-1">
-      <div className="flex items-center gap-2 border-b pb-2">
-        <Terminal size={14} className="text-muted-foreground" />
-        <Badge variant="outline" className="bg-primary/10 text-primary">
+      <div className="flex items-center gap-2 border-b pb-2 pl-2">
+        <Terminal size={14} className="text-muted-foreground dark:text-blue-400" />
+        <Badge variant="outline" className="bg-primary/10 text-primary dark:bg-blue-300/10 dark:text-blue-300">
           {name}
         </Badge>
-        <span className="text-xs text-muted-foreground">Tool execution</span>
+        <span className="text-xs text-muted-foreground dark:text-blue-300/80">Tool execution</span>
       </div>
       
       <div className="bg-muted/40 p-3 rounded-md flex items-center gap-3 pt-0">
