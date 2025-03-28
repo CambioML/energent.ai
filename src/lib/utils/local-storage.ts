@@ -9,8 +9,6 @@ export interface User extends Member {
   user_email?: string;
 }
 
-export const LocalStoragePrefix = 'Epsilla_';
-
 export enum LocalStorageKey {
   LoggedIn = 'loggedIn',
   Token = 'token',
@@ -34,11 +32,11 @@ export enum LocalStorageKey {
 }
 
 export const setLocalStorage = (key: string, value: string) => {
-  localStorage.setItem(LocalStoragePrefix + key, value);
+  localStorage.setItem(key, value);
 }
 
 export const getLocalStorage = (key: string) => {
-  return localStorage.getItem(LocalStoragePrefix + key);
+  return localStorage.getItem(key);
 }
 
 export const getIdToken = () => {
@@ -46,7 +44,7 @@ export const getIdToken = () => {
 }
 
 export const getAnonymousToken = () => {
-  let token = localStorage.getItem(LocalStoragePrefix + LocalStorageKey.AnonymousToken);
+  let token = localStorage.getItem(LocalStorageKey.AnonymousToken);
   if (!token) {
     token = 'anonymous_' + uuidv4();
     setLocalStorage(LocalStorageKey.AnonymousToken, token);

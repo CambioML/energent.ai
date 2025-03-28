@@ -4,10 +4,9 @@ import remarkGfm from "remark-gfm";
 
 interface TextContentProps {
   content: string;
-  isBot: boolean;
 }
 
-export function TextContent({ content, isBot }: TextContentProps) {
+export function TextContent({ content }: TextContentProps) {
   return (
     <div className="markdown-content text-sm">
       <ReactMarkdown

@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePostHog } from 'posthog-js/react';
-import { Rocket, Cpu, BrainCircuit } from 'lucide-react';
-import { ThemeProvider, CheckboxField, useAuthenticator, Authenticator } from '@aws-amplify/ui-react';
+import { Rocket, BrainCircuit } from 'lucide-react';
+import { ThemeProvider as AmplifyThemeProvider, CheckboxField, useAuthenticator, Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import axios from 'axios';
 
@@ -13,9 +13,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loading } from "@/components/ui/loading";
 
 import { getFormFields } from '@/i18n';
-import { customTheme } from '@/config/amplify';
+import { lightTheme, darkTheme } from '@/config/amplify';
 import { Endpoint } from '@/lib/api/endpoints';
 import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
+import { useTheme } from '@/components/theme-provider';
 import keys from '@/i18n/keys';
 
 import '@aws-amplify/ui-react/styles.css';
@@ -63,6 +64,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formFields, setFormFields] = useState(getFormFields());
+  const { theme } = useTheme();
 
   // Update form fields and Amplify translations when language changes
   useEffect(() => {
@@ -136,10 +138,13 @@ export default function Login() {
     }
   }, [user]);
 
+  // Get the appropriate theme based on the current mode
+  const currentAmplifyTheme = theme === 'dark' ? darkTheme : lightTheme;
+
   return (
     <main>
       <section className="relative">
-        <div className="relative py-12 lg:py-20">
+        <div className="relative py-12 lg:py-12">
           <div className="mx-auto max-w-7xl px-6 md:px-12">
             <div className="text-center sm:mx-auto sm:w-10/12 lg:mr-auto lg:mt-0 lg:w-4/5">
               <h1 className="mt-8 text-4xl font-semibold md:text-5xl xl:text-5xl xl:[line-height:1.125]">
@@ -157,8 +162,8 @@ export default function Login() {
             
             <div className="relative mx-auto mt-8 max-w-xl sm:mt-12">
               {/* Colorful backdrop elements */}
-              <div className="absolute inset-0 -top-8 left-1/2 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)]"></div>
-              <div className="absolute inset-x-0 top-2 mx-auto h-1/3 w-2/3 rounded-full bg-blue-300 blur-3xl"></div>
+              <div className="absolute inset-0 -top-8 left-1/2 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:hidden"></div>
+              <div className="absolute inset-x-0 top-4 mx-auto h-2/3 w-3/3 scale-[80%] rounded-full bg-blue-300 dark:bg-blue-500 blur-[120px]"></div>
               
               {/* Login Form */}
               <motion.div 
@@ -169,7 +174,6 @@ export default function Login() {
                 <Card className="border shadow-md">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-center gap-3 mb-6 pt-4">
-                      <Cpu className="h-10 w-10 text-primary" />
                       <h2 className="text-2xl font-bold">
                         Energent.ai
                       </h2>
@@ -181,24 +185,7 @@ export default function Login() {
                       </Alert>
                     )}
                     
-                    <ThemeProvider theme={{
-                      ...customTheme,
-                      tokens: {
-                        ...customTheme.tokens,
-                        components: {
-                          ...customTheme.tokens.components,
-                          button: {
-                            ...customTheme.tokens.components?.button,
-                            primary: {
-                              backgroundColor: 'black',
-                              _hover: {
-                                backgroundColor: '#333',
-                              },
-                            },
-                          },
-                        },
-                      },
-                    }}>
+                    <AmplifyThemeProvider theme={currentAmplifyTheme}>
                       <Authenticator
                         initialState="signIn"
                         loginMechanisms={['email']}
@@ -261,7 +248,7 @@ export default function Login() {
                           </motion.div>
                         )}
                       </Authenticator>
-                    </ThemeProvider>
+                    </AmplifyThemeProvider>
                     
                     <div className="relative my-6">
                       <div className="absolute inset-0 flex items-center">

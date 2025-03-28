@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Maximize2, Minimize2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Endpoint } from "@/lib/api/endpoints";
-import { AGENT_ID, PROJECT_ID } from "@/lib/api/config";
 import { cn } from "@/lib/utils";
+import { useAgentStore } from "@/lib/store/agent";
 
 interface ImageContentProps {
   source: string;
@@ -12,11 +9,12 @@ interface ImageContentProps {
 
 export function ImageContent({ source }: ImageContentProps) {
   const [expanded, setExpanded] = useState(false);
+  const { projectId, agentId } = useAgentStore();
   
   // Use the correct image source URL with proper endpoint
   const imageUrl = source.startsWith("http") 
     ? source 
-    : `${Endpoint.chatbotApp}/image/${PROJECT_ID}/${AGENT_ID}/${source}`;
+    : `${Endpoint.chatbotApp}/image/${projectId}/${agentId}/${source}`;
 
     // Handle blocking body scroll when expanded
   useEffect(() => {

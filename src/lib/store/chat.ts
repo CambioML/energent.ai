@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { ChatAPI } from '../api/chat-api';
+import { useAgentStore } from './agent';
+import toast from 'react-hot-toast';
 
 export interface Message {
   id: string;
@@ -23,21 +25,17 @@ interface ChatState {
   currentConversationId: string | null;
   messages: Message[];
   isTyping: boolean;
-  error: string | null;
-  
+  messagesLoaded: boolean;
   // Actions
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
-  setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
-  updateMessage: (id: string, updates: Partial<Message>) => void;
-  setIsTyping: (isTyping: boolean) => void;
-  setError: (error: string | null) => void;
+  updateMessage: (id: string, updates: Partial<Message>) => Promise<void>;
   
   // API Actions
   fetchConversations: () => Promise<void>;
-  fetchConversation: (conversationId: string) => Promise<void>;
-  createConversation: (summary?: string) => Promise<string>;
+  fetchConversation: (conversationId: string) => Promise<boolean>;
+  createConversation: (summary?: string, projectId?: string, agentId?: string) => Promise<string>;
   deleteConversation: (conversationId: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   sendFeedback: (messageId: string, feedback: 'good' | 'bad') => Promise<void>;
@@ -48,48 +46,154 @@ export const useChatStore = create<ChatState>((set, get) => ({
   conversations: [],
   currentConversationId: null,
   messages: [],
+  messagesLoaded: false,
   isTyping: false,
-  error: null,
   
   // Basic actions
   setConversations: (conversations) => set({ conversations }),
   setCurrentConversationId: (id) => set({ currentConversationId: id }),
-  setMessages: (messages) => set({ messages }),
   addMessage: (message) => set((state) => ({ 
     messages: [...state.messages, message] 
   })),
-  updateMessage: (id, updates) => set((state) => ({
-    messages: state.messages.map(msg => 
-      msg.id === id ? { ...msg, ...updates } : msg
-    )
-  })),
-  setIsTyping: (isTyping) => set({ isTyping }),
-  setError: (error) => set({ error }),
+  updateMessage: async (id, updates) => {
+    const { currentConversationId, messages } = get();
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!currentConversationId || !projectId || !agentId) {
+      toast.error('Missing required information');
+      return;
+    }
+    
+    try {
+      // Find the message to update
+      const messageToUpdate = messages.find(msg => msg.id === id);
+      
+      if (!messageToUpdate) {
+        toast.error('Message not found');
+        return;
+      }
+      
+      // Find message index to update UI properly
+      const messageIndex = messages.findIndex(msg => msg.id === id);
+      
+      // Delete the message (which will also delete all messages after it)
+      await ChatAPI.deleteMessagesStartingFrom(currentConversationId, id, projectId, agentId);
+      
+      // Update UI immediately to remove the deleted messages
+      set((state) => ({
+        messages: state.messages.slice(0, messageIndex)
+      }));
+      
+      // Send the updated message content
+      if (updates.content) {
+        set({ isTyping: true });
+        
+        // Send the updated message as a new message
+        const updatedMessage: Message = {
+          ...messageToUpdate,
+          ...updates,
+          id: Date.now().toString(), // New ID for the updated message
+          timestamp: Date.now()
+        };
+        
+        // Add the updated user message to the UI
+        set((state) => ({ 
+          messages: [...state.messages, updatedMessage] 
+        }));
+        
+        // Send the message to get a new AI response
+        const response = await ChatAPI.sendMessage(
+          currentConversationId, 
+          updatedMessage.content,
+          projectId, 
+          agentId
+        );
+        
+        const messageId = response.result;
+        
+        // Poll for streaming response
+        let completed = false;
+        while (!completed) {
+          const streamResponse = await ChatAPI.streamResponse(messageId, projectId, agentId);
+          const result = streamResponse.result;
+          
+          if (result.completed) {
+            completed = true;
+            
+            // Extract data from the response
+            const generatedResult = result.result['Generated Result'];
+            const references = result.result.References || [];
+            
+            // Add bot response
+            const botMessage: Message = {
+              id: messageId,
+              content: generatedResult,
+              isBot: true,
+              timestamp: Date.now(),
+              conversationId: currentConversationId,
+              references: references,
+            };
+            set((state) => ({ 
+              messages: [...state.messages, botMessage] 
+            }));
+          }
+          
+          // Short delay between polling
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
+        set({ isTyping: false });
+      }
+    } catch (error) {
+      console.error('Error updating message:', error);
+      toast.error('Failed to update message');
+    }
+  },
   
   // API actions
   fetchConversations: async () => {
-    const { setError, setConversations, setCurrentConversationId } = get();
-    setError(null);
+    const { setConversations, setCurrentConversationId, createConversation } = get();
+    const { projectId, agentId } = useAgentStore.getState();
+    
     try {
-      const data = await ChatAPI.getConversations();
+      console.log('Fetching conversations for projectId:', projectId, 'and agentId:', agentId);
+      const data = await ChatAPI.getConversations(projectId, agentId);
       const conversations = data.result.map((conv: any) => ({
         id: conv.conversationId || conv.ConversationId,
         summary: conv.summary || conv.Summary || 'Unnamed Conversation',
         timestamp: conv.timestamp || conv.CreatedAt || Date.now(),
       }));
+      
       setConversations(conversations);
-      setCurrentConversationId(conversations[0].id);
+      
+      // If no conversations are available, create a new one
+      if (conversations.length === 0) {
+        console.log('No conversations found, creating a new one');
+        const newConversationId = await createConversation('New Chat');
+        setCurrentConversationId(newConversationId);
+        return conversations;
+      } else {
+        setCurrentConversationId(conversations[0]?.id || null);
+      }
+      
+      return conversations;
     } catch (error) {
       console.error('Error fetching conversations:', error);
-      setError('Failed to load conversations');
+      toast.error('Failed to load conversations');
+      return [];
     }
   },
   
   fetchConversation: async (conversationId) => {
-    const { setMessages, setError } = get();
-    setError(null);
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      throw new Error('Project ID or Agent ID not set');
+    }
+    
     try {
-      const data = await ChatAPI.getConversation(conversationId);
+      const data = await ChatAPI.getConversation(conversationId, projectId, agentId);
       const messages = data.result.history.map((msg: any) => ({
         id: msg.MessageId,
         content: msg.Content,
@@ -98,18 +202,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
         conversationId,
         references: msg.References || [],
       }));
-      setMessages(messages);
+      set({ messages, messagesLoaded: true });
+      return true;
     } catch (error) {
       console.error('Error fetching conversation:', error);
-      setError('Failed to load conversation history');
+      toast.error('Failed to load conversation history');
+      return false;
     }
   },
   
-  createConversation: async (summary = 'New Task') => {
-    const { setError, fetchConversations, setCurrentConversationId } = get();
-    setError(null);
+  createConversation: async (summary = 'New Task', projectIdParam?: string, agentIdParam?: string) => {
+    const { fetchConversations, setCurrentConversationId } = get();
+    const { projectId: storeProjectId, agentId: storeAgentId } = useAgentStore.getState();
+    
+    const projectId = projectIdParam || storeProjectId;
+    const agentId = agentIdParam || storeAgentId;
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      throw new Error('Project ID or Agent ID not set');
+    }
+    
     try {
-      const data = await ChatAPI.createConversation(summary);
+      const data = await ChatAPI.createConversation(summary, projectId, agentId);
       const conversationId = data.result.conversationId;
 
       await fetchConversations();
@@ -118,16 +233,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return conversationId;
     } catch (error) {
       console.error('Error creating conversation:', error);
-      setError('Failed to create new conversation');
+      toast.error('Failed to create new conversation');
       throw error;
     }
   },
   
   deleteConversation: async (conversationId) => {
-    const { setError, fetchConversations, currentConversationId, setCurrentConversationId } = get();
-    setError(null);
+    const { fetchConversations, currentConversationId, setCurrentConversationId } = get();
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      throw new Error('Project ID or Agent ID not set');
+    }
+    
     try {
-      await ChatAPI.deleteConversation(conversationId);
+      await ChatAPI.deleteConversation(conversationId, projectId, agentId);
       await fetchConversations();
       
       // Reset current conversation if we deleted the active one
@@ -136,16 +257,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error deleting conversation:', error);
-      setError('Failed to delete conversation');
+      toast.error('Failed to delete conversation');
     }
   },
   
   sendMessage: async (content) => {
-    const { currentConversationId, addMessage, setIsTyping, setError } = get();
+    const { currentConversationId, addMessage } = get();
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      throw new Error('Project ID or Agent ID not set');
+    }
     
     if (!currentConversationId) {
-      setError('No active conversation');
-      return;
+      toast.error('No active conversation');
+      throw new Error('No active conversation');
     }
     
     // Add user message to UI immediately
@@ -160,16 +287,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
     addMessage(userMessage);
     
     try {
-      setIsTyping(true);
+      set({ isTyping: true });
       
       // Send message to API
-      const response = await ChatAPI.sendMessage(currentConversationId, content);
+      const response = await ChatAPI.sendMessage(currentConversationId, content, projectId, agentId);
       const messageId = response.result;
       
       // Poll for streaming response
       let completed = false;
       while (!completed) {
-        const streamResponse = await ChatAPI.streamResponse(messageId);
+        const streamResponse = await ChatAPI.streamResponse(messageId, projectId, agentId);
         const result = streamResponse.result;
         
         if (result.completed) {
@@ -196,26 +323,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Failed to send message');
+      toast.error('Failed to send message');
     } finally {
-      setIsTyping(false);
+      set({ isTyping: false });
     }
   },
   
   sendFeedback: async (messageId, feedback) => {
-    const { currentConversationId, updateMessage, setError } = get();
+    const { currentConversationId, updateMessage } = get();
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      throw new Error('Project ID or Agent ID not set');
+    }
     
     if (!currentConversationId) {
-      setError('No active conversation');
-      return;
+      toast.error('No active conversation');
+      throw new Error('No active conversation');
     }
     
     try {
-      await ChatAPI.sendFeedback(currentConversationId, messageId, feedback);
+      await ChatAPI.sendFeedback(currentConversationId, messageId, feedback, projectId, agentId);
       updateMessage(messageId, { feedback });
     } catch (error) {
       console.error('Error sending feedback:', error);
-      setError('Failed to send feedback');
+      toast.error('Failed to send feedback');
     }
   },
 })); 

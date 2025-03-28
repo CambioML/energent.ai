@@ -35,12 +35,11 @@ export function ToolResultContent({ content, isError }: ToolResultContentProps) 
         {content.map((item, index) => (
           <div key={index}>
             {item.type === 'text' && (
-              <TextContent content={item.content} isBot={true} />
+              <TextContent content={item.content} />
             )}
             {item.type === 'image' && (
               <ImageContent source={item.content} />
             )}
-            {/* Add more content types as needed */}
           </div>
         ))}
       </div>

@@ -3,10 +3,14 @@ import Screen from '@/components/screen/Screen';
 import Sidebar from '@/components/sidebar/Sidebar';
 import StatusIndicator from '@/components/screen/StatusIndicator';
 import { NewTaskModal } from '@/components/chat/NewTaskModal';
+import { useOnLogin } from '@/lib/hooks/useOnLogin';
 
 export default function Agent() {
+  // Initialize agent on login
+  useOnLogin();
+
   return (
-    <div className="min-h-[calc(100vh-73px)] flex flex-col bg-background">
+    <div className="min-h-[calc(100vh-73px)] max-h-[calc(100vh-73px)] overflow-hidden flex flex-col bg-background">
       {/* Sidebar */}
       <Sidebar />
       

@@ -5,4 +5,39 @@
   border-width: 0 !important;
   border-style: none !important;
   box-shadow: none !important;
+}
+
+/* Dark mode overrides for Amplify UI components */
+.dark [data-amplify-authenticator] {
+  --amplify-colors-background-primary: var(--card);
+  --amplify-colors-background-secondary: var(--muted);
+  --amplify-colors-font-interactive: var(--foreground);
+  --amplify-colors-border-primary: var(--border);
+  --amplify-colors-border-secondary: var(--border);
+  --amplify-components-tabs-item-color: var(--foreground);
+  --amplify-components-tabs-item-active-color: var(--primary);
+  --amplify-components-tabs-item-focus-color: var(--primary);
+  --amplify-components-tabs-item-hover-color: var(--primary);
+}
+
+/* Ensure login form text is readable in dark mode */
+.dark [data-amplify-authenticator] [data-amplify-form] {
+  color: var(--foreground);
+}
+
+/* Ensure links are visible in dark mode */
+.dark [data-amplify-authenticator] a {
+  color: var(--primary);
+}
+
+/* Fix form field contrast in dark mode */
+.dark [data-amplify-authenticator] [data-amplify-field-group] input {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+/* Fix button colors in dark mode */
+.dark [data-amplify-authenticator] [data-amplify-button] {
+  color: var(--primary-foreground);
 } 

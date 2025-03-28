@@ -4,7 +4,9 @@ import { useChatStore } from "@/lib/store/chat";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MessageItem } from "./MessageItem";
 import toast from "react-hot-toast";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Send } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useAgentStore } from "@/lib/store/agent";
 
 export function Messages() {
   const [userScrolled, setUserScrolled] = useState(false);
@@ -14,15 +16,17 @@ export function Messages() {
   
   // Global state from stores
   const { 
-    error,
     isTyping,
     currentConversationId,
     messages, 
     fetchConversation, 
     fetchConversations,
     createConversation,
-    sendFeedback 
+    sendFeedback,
+    messagesLoaded
   } = useChatStore();
+  
+  const { projectId, agentId } = useAgentStore();
   
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -44,9 +48,10 @@ export function Messages() {
     }
   };
   
-  // Initialize conversation if needed - only if not in history mode
-  useEffect(() => {
-    const initializeChat = async () => {
+  // Initialize conversation if needed with useQuery
+  useQuery({
+    queryKey: ['initializeChat', projectId, agentId],
+    queryFn: async () => {
       try {
         if (!currentConversationId) {
           const conversations = await fetchConversations();
@@ -56,27 +61,23 @@ export function Messages() {
             await createConversation("New Chat");
           }
         }
+        return true;
       } catch (error) {
         console.error("Failed to initialize chat:", error);
         toast.error("Failed to initialize chat");
+        throw error;
       }
-    };
-    
-    initializeChat();
-  }, []);
+    },
+    enabled: !!projectId && !!agentId && !currentConversationId
+  });
 
-  useEffect(() => {
-    if (currentConversationId) {
-      fetchConversation(currentConversationId);
-    }
-  }, [currentConversationId, fetchConversation]);
+  // Fetch conversation messages with useQuery
+  useQuery({
+    queryKey: ['fetchConversation', currentConversationId],
+    queryFn: () => fetchConversation(currentConversationId!),
+    enabled: !!currentConversationId
+  });
   
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
-
   const handleMessageFeedback = async (messageId: string, feedback: 'good' | 'bad') => {
     if (!currentConversationId) return;
     
@@ -107,6 +108,30 @@ export function Messages() {
           Fetching your messages
         </p>
         <LoadingDots className="justify-center" />
+      </motion.div>
+    </div>
+  );
+
+  // Empty state content
+  const renderEmptyState = () => (
+    <div className="flex-1 overflow-y-auto p-4 h-full flex items-center justify-center">
+      <motion.div
+        key="empty-state"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.5 }}
+        className="text-center p-8"
+      >
+        <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-xl font-medium mb-2">No Messages Yet</h3>
+        <p className="text-muted-foreground mb-4">
+          Start a conversation by typing a message below
+        </p>
+        <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground">
+          <Send className="h-4 w-4" />
+          <span>Type a message to begin</span>
+        </div>
       </motion.div>
     </div>
   );
@@ -150,10 +175,11 @@ export function Messages() {
 
   return (
     <AnimatePresence mode="wait">
-      {messages.length === 0 ? (
-        renderLoadingState()
+      {messagesLoaded ? (
+        messages.length > 0 ? renderMessages() : 
+        renderEmptyState()
       ) : (
-        renderMessages()
+        renderLoadingState()
       )}
     </AnimatePresence>
   );

@@ -23,7 +23,7 @@ export function MessageContent({ content, isBot }: MessageContentProps) {
 
   // Regular text message (either user message or non-AutoAgentResponse bot message)
   if (!parsedContents) {
-    return <TextContent content={content} isBot={isBot} />;
+    return <TextContent content={content} />;
   }
 
   // AutoAgentResponse format with multiple content types
@@ -41,7 +41,7 @@ export function MessageContent({ content, isBot }: MessageContentProps) {
       {parsedContents.map((item, index) => (
         <div key={index}>
           {item.type === 'text' && (
-            <TextContent content={item.content} isBot={isBot} />
+            <TextContent content={item.content} />
           )}
           
           {item.type === 'image' && (

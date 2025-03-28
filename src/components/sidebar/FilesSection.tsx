@@ -6,7 +6,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
 
 export const FilesSection = () => {
   const { expandedAccordions, toggleAccordion } = useSidebarStore();
@@ -32,43 +31,9 @@ export const FilesSection = () => {
         </div>
         <AccordionContent>
           <div className="p-4">
-            <div className="space-y-4">
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">NVIDIA_Annual_Stoc...r_Meeting_2024.pdf</span>
-                </div>
-              </div>
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">Meta-Earnings-Presentation-Q2-2024.pdf</span>
-                </div>
-              </div>
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">Amazon.txt</span>
-                </div>
-              </div>
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">AT&T.txt</span>
-                </div>
-              </div>
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">InteractiveBrokersSampleStatementShort</span>
-                </div>
-              </div>
-              <div className="p-3 bg-background rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <Files size={18} />
-                  <span className="text-sm font-medium truncate">fidelity-sample</span>
-                </div>
-              </div>
+            <div className="flex flex-col items-center justify-center gap-3 py-8 text-center text-muted-foreground">
+              <Files size={40} className="opacity-40" />
+              <p>File access is coming soon</p>
             </div>
           </div>
         </AccordionContent>

@@ -7,29 +7,31 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAgentStore } from '@/lib/store/agent';
+import { useQuery } from '@tanstack/react-query';
 
 export const TaskHistorySection = () => {
+  const navigate = useNavigate();
   const { expandedAccordions, toggleAccordion } = useSidebarStore();
   const { 
     conversations, 
     currentConversationId, 
-    fetchConversations, 
-    setCurrentConversationId,
-    fetchConversation
+    fetchConversations
   } = useChatStore();
   
-  // Fetch conversations when component mounts
-  useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+  const { projectId, agentId } = useAgentStore();
   
-  // Handle task click
-  const handleTaskClick = async (conversationId: string) => {
-    if (conversationId !== currentConversationId) {
-      setCurrentConversationId(conversationId);
-      await fetchConversation(conversationId);
-    }
+  // Use React Query to fetch conversations
+  useQuery({
+    queryKey: ['conversations', projectId, agentId],
+    queryFn: fetchConversations,
+    enabled: !!projectId && !!agentId,
+  });
+  
+  // Handle task click - navigate to recording replay
+  const handleTaskClick = (conversationId: string) => {
+    navigate(`/history/${conversationId}`);
   };
   
   return (

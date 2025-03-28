@@ -8,8 +8,9 @@ import { Toaster } from 'react-hot-toast';
 import { Endpoint } from './lib/api/endpoints';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { getAnonymousToken, getIdToken, LocalStorageKey, LocalStoragePrefix, setLocalStorage } from './lib/utils/local-storage';
+import { getAnonymousToken, getIdToken, LocalStorageKey, setLocalStorage } from './lib/utils/local-storage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './components/theme-provider';
 import './i18n';
 
 function AppContent() {
@@ -20,7 +21,7 @@ function AppContent() {
         return config;
       }
 
-      const token = import.meta.env.VITE_TOKEN || getIdToken();
+      const token = getIdToken();
       config.headers['Authorization'] = 'Bearer ' + token || getAnonymousToken();
 
       if (!config.headers['Content-Type']) {
@@ -67,7 +68,7 @@ function AppContent() {
   // Storage event listener for cross-tab authentication
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === LocalStoragePrefix + LocalStorageKey.LoggedIn) {
+      if (event.key === LocalStorageKey.LoggedIn) {
         // Log user out in other windows
         if (event.newValue === 'false') {
           location.replace(location.origin);
@@ -86,14 +87,12 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/agent" element={<Agent />} />
-          <Route path="/history/:conversationId" element={<RecordingReplay />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/agent" element={<Agent />} />
+        <Route path="/history/:conversationId" element={<RecordingReplay />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <Toaster />
     </div>
   );
@@ -101,13 +100,15 @@ function AppContent() {
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID as string}>
-      <Authenticator.Provider>
-        <Router>
-          <AppContent />
-        </Router>
-      </Authenticator.Provider>
-    </GoogleOAuthProvider>
+    <ThemeProvider defaultTheme="light">
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID as string}>
+        <Authenticator.Provider>
+          <Router>
+            <AppContent />
+          </Router>
+        </Authenticator.Provider>
+      </GoogleOAuthProvider>
+    </ThemeProvider>
   );
 }
 
