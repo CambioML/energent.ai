@@ -8,16 +8,12 @@ import { Toaster } from 'react-hot-toast';
 import { Endpoint } from './lib/api/endpoints';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { getAnonymousToken, getIdToken, LocalStorageKey, LocalStoragePrefix, setLocalStorage } from './lib/utils/local-storage';
+import { getAnonymousToken, getIdToken, LocalStorageKey, setLocalStorage } from './lib/utils/local-storage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useOnLogin } from './lib/hooks/useOnLogin';
 import { ThemeProvider } from './components/theme-provider';
 import './i18n';
 
 function AppContent() {
-  // Initialize agent on login
-  useOnLogin();
-
   // Axios interceptors
   axios.interceptors.request.use(
     (config) => {
@@ -72,7 +68,7 @@ function AppContent() {
   // Storage event listener for cross-tab authentication
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === LocalStoragePrefix + LocalStorageKey.LoggedIn) {
+      if (event.key === LocalStorageKey.LoggedIn) {
         // Log user out in other windows
         if (event.newValue === 'false') {
           location.replace(location.origin);

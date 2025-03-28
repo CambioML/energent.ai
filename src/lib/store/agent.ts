@@ -85,9 +85,18 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       throw new Error('Project ID not set. Please initialize project ID first.');
     }
     
-    // Try to get an existing agent ID
-    const agentId = await AgentAPI.getAgentId(projectId);
-    
+    let agentId = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (!agentId && attempts < maxAttempts) {
+      // Try to get an existing agent ID
+      agentId = await AgentAPI.getAgentId(projectId);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Attempting to get agent ID...', attempts);
+      attempts++;
+    }
+      
     if (agentId) {
       // If we got a real agent ID, use it
       console.log('Using existing agent ID:', agentId);

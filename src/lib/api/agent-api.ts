@@ -10,7 +10,7 @@ interface AgentAPI {
     }>;
     resetAgent: (agentId: string) => Promise<void>;
     getProjectId: () => Promise<string>;
-    createAgent: (projectId: string, name?: string, description?: string) => Promise<string>;
+    createAgent: (projectId: string) => Promise<string>;
     getAgentId: (projectId: string) => Promise<string | null>;
 }
 
@@ -116,6 +116,7 @@ export const AgentAPI: AgentAPI = {
             
             // Make the API request to create the agent
             const response = await axios.post(`${resourcesDomain}/ragapps`, agentConfig);
+            console.log('Agent created:', response.data);
             
             if (response.data && response.data.agent_id) {
                 return response.data.agent_id;
