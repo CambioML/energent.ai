@@ -6,7 +6,8 @@ import {
   CircleDot,
   Target,
   Keyboard,
-  Command
+  Command,
+  Type
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -26,6 +27,8 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
         return <Camera size={16} className="text-primary" />;
       case "key":
         return <Keyboard size={16} className="text-primary" />;
+      case "type":
+        return <Type size={16} className="text-purple-500" />;
       case "left_click":
         return <MousePointerClick size={16} className="text-blue-500" />;
       case "right_click":
@@ -66,6 +69,8 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
         return "Keyboard Input";
       case "execute":
         return "Execute Command";
+      case "type":
+        return "Type text";
       default:
         return action.replace(/_/g, ' ');
     }
@@ -103,6 +108,7 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
         return (
           <div className="text-xs text-muted-foreground">Getting the current cursor position</div>
         );
+      case "type":
       case "key":
         return (
           <div className="text-xs text-muted-foreground">

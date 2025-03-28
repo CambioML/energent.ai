@@ -34,5 +34,5 @@ export enum Endpoint {
   dataSources = etlDomain + '/api/v1/datasources/',
   auth = etlDomain + '/api/v1/auth',
   leads = usersDomain + '/api/leads',
-  fileUpload = 'https://agentforge.epsilla.com/api/v1/computer_use/agent',
+  agent = 'https://agentforge.epsilla.com/api/v1/computer_use/agent',
 }

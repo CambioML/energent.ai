@@ -6,35 +6,32 @@ import { ChatAPI } from './chat-api';
 
 interface AgentAPI {
     getAgentStatus: (agentId: string) => Promise<{
-        message: 'Ready' | 'Loading' | 'Running' | 'Error';
+        message: 'Ready' | 'Starting' | 'Running' | 'Error';
     }>;
-    resetAgent: (agentId: string) => Promise<void>;
     getProjectId: () => Promise<string>;
     createAgent: (projectId: string) => Promise<string>;
     getAgentId: (projectId: string) => Promise<string | null>;
+    stopAgent: (agentId: string) => Promise<void>;
+    restartAgent: (agentId: string) => Promise<void>;
 }
 
 export const AgentAPI: AgentAPI = {
     getAgentStatus: async (agentId: string) => {
         try {
             const response = await axios.get(`${resourcesDomain}/agent/${agentId}/status`);
-            return response.data;
+            switch (response.data.message) {
+                case 'NotReady':
+                case 'Loading':
+                    return { message: 'Starting' };
+                default:
+                    return response.data;
+            }
         } catch (error) {
             console.error('Failed to get agent status:', error);
             return { message: 'Error' };
         }
     },
     
-    resetAgent: async (agentId: string) => {
-        try {
-            const response = await axios.post(`${resourcesDomain}/${agentId}/reset`);
-            return response.data;
-        } catch (error) {
-            console.error('Failed to reset agent:', error);
-            throw error;
-        }
-    },
-
     getProjectId: async () => {
         try {
             // Step 1: Get organizations to find root resource ID
@@ -152,6 +149,28 @@ export const AgentAPI: AgentAPI = {
         } catch (error) {
             console.error('Failed to get agent ID:', error);
             return null;
+        }
+    },
+
+    stopAgent: async (agentId: string) => {
+        try {
+            const response = await axios.put(`${Endpoint.agent}/${agentId}/stop`);
+            console.log('Agent stopped:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to stop agent:', error);
+            throw error;
+        }
+    },
+
+    restartAgent: async (agentId: string) => {
+        try {
+            const response = await axios.put(`${Endpoint.agent}/${agentId}/restart`);
+            console.log('Agent restarted:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to restart agent:', error);
+            throw error;
         }
     }
 }

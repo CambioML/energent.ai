@@ -140,7 +140,7 @@ export const ChatAPI: ChatAPI = {
       formData.append('file', file, file.name);
       
       const response = await axios.put(
-        `${Endpoint.fileUpload}/${agentId}/upload`,
+        `${Endpoint.agent}/${agentId}/upload`,
         formData,
         {
           headers: {

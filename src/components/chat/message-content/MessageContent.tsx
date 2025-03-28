@@ -3,6 +3,7 @@ import { parseAutoAgentResponse, ParsedMessageContent } from "@/lib/utils/messag
 import { TextContent } from "./TextContent";
 import { ImageContent } from "./ImageContent";
 import { ToolUseContent } from "./ToolUseContent";
+import { ToolResultContent } from "./ToolResultContent";
 import { BrainCircuit } from "lucide-react";
 
 interface MessageContentProps {
@@ -54,6 +55,14 @@ export function MessageContent({ content, isBot }: MessageContentProps) {
             <ToolUseContent 
               name={item.content.name} 
               input={item.content.input} 
+            />
+          )}
+          
+          {item.type === 'tool_result' && item.content.length > 0 && (
+            <ToolResultContent 
+              content={item.content} 
+              isError={(item as any).is_error || false}
+              toolUseId={(item as any).tool_use_id}
             />
           )}
         </div>

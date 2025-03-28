@@ -19,7 +19,8 @@ type AgentState = {
   setAgentId: (id: string) => void;
   setStatus: (status: AgentStatus) => void;
   setTaskName: (name: string) => void;
-  resetAgent: () => Promise<void>;
+  stopAgent: () => Promise<void>;
+  restartAgent: () => Promise<void>;
   openNewTaskModal: () => void;
   closeNewTaskModal: () => void;
   handleNewTask: (keepLayout: boolean) => Promise<void>;
@@ -38,9 +39,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   setAgentId: (id) => set({ agentId: id }),
   setStatus: (status) => set({ status }),
   setTaskName: (name) => set({ taskName: name }),
-  resetAgent: async () => {
+  stopAgent: async () => {
     const { agentId } = get();
-    await AgentAPI.resetAgent(agentId);
+    await AgentAPI.stopAgent(agentId);
+    set({ status: AgentStatus.Ready });
+  },
+  restartAgent: async () => {
+    const { agentId } = get();
+    await AgentAPI.restartAgent(agentId);
     set({ status: AgentStatus.Starting });
   },
   openNewTaskModal: () => set({ isNewTaskModalOpen: true }),
@@ -48,16 +54,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   handleNewTask: async (keepLayout: boolean) => {
     // Generate a new task name
     const newTaskName = `New Task ${Date.now()}`;
-
-    // TODO use keepLayout to determine if we should keep the current layout, call real API
     console.log("keepLayout", keepLayout);
-    
-    // // Update agent store
-    // set({ 
-    //   status: AgentStatus.Starting,
-    //   taskName: newTaskName,
-    //   isNewTaskModalOpen: false
-    // });
+
+    if (!keepLayout) {
+      await get().restartAgent()
+      // Update agent store
+      set({ 
+        status: AgentStatus.Starting,
+        taskName: newTaskName,
+      });
+    }
     
     // Create a new conversation in the chat store
     const chatStore = useChatStore.getState();

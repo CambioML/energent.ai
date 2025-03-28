@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { ChatAPI } from '../api/chat-api';
-import { useAgentStore } from './agent';
+import { AgentStatus, useAgentStore } from './agent';
 import toast from 'react-hot-toast';
 
 export interface Message {
   id: string;
   content: string;
   isBot: boolean;
+  isPartial?: boolean;
   timestamp: number;
   conversationId: string;
   references?: any[];
@@ -26,6 +27,7 @@ interface ChatState {
   messages: Message[];
   isTyping: boolean;
   messagesLoaded: boolean;
+  isGenerating: boolean;
   // Actions
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
@@ -39,6 +41,9 @@ interface ChatState {
   deleteConversation: (conversationId: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   sendFeedback: (messageId: string, feedback: 'good' | 'bad') => Promise<void>;
+  
+  // Helper function to stream and process AI responses
+  streamAndProcessResponse: (messageId: string, conversationId: string, projectId: string, agentId: string) => Promise<boolean>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -48,6 +53,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   messagesLoaded: false,
   isTyping: false,
+  isGenerating: false,
   
   // Basic actions
   setConversations: (conversations) => set({ conversations }),
@@ -56,7 +62,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     messages: [...state.messages, message] 
   })),
   updateMessage: async (id, updates) => {
-    const { currentConversationId, messages } = get();
+    const { currentConversationId, messages, streamAndProcessResponse } = get();
     const { projectId, agentId } = useAgentStore.getState();
     
     if (!currentConversationId || !projectId || !agentId) {
@@ -70,6 +76,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       if (!messageToUpdate) {
         toast.error('Message not found');
+        set({ isGenerating: false });
         return;
       }
       
@@ -86,9 +93,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       // Send the updated message content
       if (updates.content) {
-        set({ isTyping: true });
-        
-        // Send the updated message as a new message
+        // Create updated message with new ID
         const updatedMessage: Message = {
           ...messageToUpdate,
           ...updates,
@@ -100,6 +105,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set((state) => ({ 
           messages: [...state.messages, updatedMessage] 
         }));
+
+        set({ isTyping: true })
         
         // Send the message to get a new AI response
         const response = await ChatAPI.sendMessage(
@@ -111,42 +118,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
         
         const messageId = response.result;
         
-        // Poll for streaming response
-        let completed = false;
-        while (!completed) {
-          const streamResponse = await ChatAPI.streamResponse(messageId, projectId, agentId);
-          const result = streamResponse.result;
-          
-          if (result.completed) {
-            completed = true;
-            
-            // Extract data from the response
-            const generatedResult = result.result['Generated Result'];
-            const references = result.result.References || [];
-            
-            // Add bot response
-            const botMessage: Message = {
-              id: messageId,
-              content: generatedResult,
-              isBot: true,
-              timestamp: Date.now(),
-              conversationId: currentConversationId,
-              references: references,
-            };
-            set((state) => ({ 
-              messages: [...state.messages, botMessage] 
-            }));
-          }
-          
-          // Short delay between polling
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        
-        set({ isTyping: false });
+        // Process streaming response
+        await streamAndProcessResponse(messageId, currentConversationId, projectId, agentId);
       }
     } catch (error) {
       console.error('Error updating message:', error);
       toast.error('Failed to update message');
+      set({ isTyping: false })
     }
   },
   
@@ -261,8 +239,101 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
   
+  // Helper function to stream and process AI responses
+  streamAndProcessResponse: async (messageId: string, conversationId: string, projectId: string, agentId: string) => {
+    const { setStatus } = useAgentStore.getState();
+
+    set({ isGenerating: true });
+    setStatus(AgentStatus.Running);
+    
+    while (useChatStore.getState().isGenerating) {
+      const streamResponse = await ChatAPI.streamResponse(messageId, projectId, agentId);
+      const result = streamResponse.result;
+      if (result.completed) {
+        // Extract data from the response
+        const generatedResult = result.result['Generated Result'];
+        const references = result.result.References || [];
+        
+        // Find if we already have a partial message to update
+        const messageExists = get().messages.some(msg => msg.id === messageId);
+        
+        if (messageExists) {
+          // Update existing message to mark it as complete
+          set((state) => {
+            const updatedMessages = [...state.messages];
+            const index = updatedMessages.findIndex(msg => msg.id === messageId);
+            if (index !== -1) {
+              updatedMessages[index] = {
+                ...updatedMessages[index],
+                content: generatedResult,
+                isPartial: false,
+                references: references
+              };
+            }
+            return { messages: updatedMessages };
+          });
+        } else {
+          // Add new complete bot response
+          const botMessage: Message = {
+            id: messageId,
+            content: generatedResult,
+            isBot: true,
+            isPartial: false,
+            timestamp: Date.now(),
+            conversationId: conversationId,
+            references: references,
+          };
+          set((state) => ({ 
+            messages: [...state.messages, botMessage] 
+          }));
+        }
+      } else if (result.result && result.result['Generated Result']) {
+        // Handle uncompleted messages
+        const partialContent = result.result['Generated Result'];
+        
+        set((state) => {
+          // Check if message already exists in the state
+          const existingMessageIndex = state.messages.findIndex(msg => msg.id === messageId);
+          
+          if (existingMessageIndex === -1) {
+            // Case 1: Message not in messages, add it
+            // Not typing a new message, but updating the last one
+            set({ isTyping: false });
+            const partialMessage: Message = {
+              id: messageId,
+              content: partialContent,
+              isPartial: true,
+              isBot: true,
+              timestamp: Date.now(),
+              conversationId: conversationId,
+            };
+            return { messages: [...state.messages, partialMessage] };
+          } else if (state.messages[existingMessageIndex].content !== partialContent) {
+            // Case 3: Message exists and needs update
+            const updatedMessages = [...state.messages];
+            updatedMessages[existingMessageIndex] = {
+              ...updatedMessages[existingMessageIndex],
+              content: partialContent,
+              timestamp: Date.now()
+            };
+            return { messages: updatedMessages };
+          }
+          // Case 2: Message exists but no update needed
+          return { messages: state.messages };
+        });
+      }
+      
+      // Short delay between polling
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    set({ isTyping: false, isGenerating: false });
+    setStatus(AgentStatus.Ready);
+    return true;
+  },
+  
   sendMessage: async (content) => {
-    const { currentConversationId, addMessage } = get();
+    const { currentConversationId, addMessage, streamAndProcessResponse } = get();
     const { projectId, agentId } = useAgentStore.getState();
     
     if (!projectId || !agentId) {
@@ -284,48 +355,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
       timestamp: Date.now(),
       conversationId: currentConversationId,
     };
+
     addMessage(userMessage);
     
     try {
-      set({ isTyping: true });
-      
       // Send message to API
       const response = await ChatAPI.sendMessage(currentConversationId, content, projectId, agentId);
       const messageId = response.result;
+      set({ isTyping: true })
       
-      // Poll for streaming response
-      let completed = false;
-      while (!completed) {
-        const streamResponse = await ChatAPI.streamResponse(messageId, projectId, agentId);
-        const result = streamResponse.result;
-        
-        if (result.completed) {
-          completed = true;
-          
-          // Extract data from the response
-          const generatedResult = result.result['Generated Result'];
-          const references = result.result.References || [];
-          
-          // Add bot response
-          const botMessage: Message = {
-            id: messageId,
-            content: generatedResult,
-            isBot: true,
-            timestamp: Date.now(),
-            conversationId: currentConversationId,
-            references: references,
-          };
-          addMessage(botMessage);
-        }
-        
-        // Short delay between polling
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      // Process streaming response
+      await streamAndProcessResponse(messageId, currentConversationId, projectId, agentId);
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
-    } finally {
-      set({ isTyping: false });
+      set({ isTyping: false, isGenerating: false });
     }
   },
   
