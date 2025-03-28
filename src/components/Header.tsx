@@ -2,10 +2,46 @@ import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Link, useLocation } from 'react-router-dom';
 import { ModeToggle } from './mode-toggle';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
+import { signOut } from 'aws-amplify/auth';
+import { usePostHog } from 'posthog-js/react';
 
 export default function Header() {
   const location = useLocation();
   const isAgentPage = location.pathname.startsWith('/agent');
+  const { user: authUser } = useAuthenticator(context => [context.user]);
+  const posthog = usePostHog();
+
+  const logout = () => {
+    // Reset PostHog if needed
+    posthog.reset(true);
+    
+    // Clear localStorage items
+    const keys = Object.keys(localStorage);
+    // Keep Cognito and redirect URL items
+    for (const key of keys) {
+      if (!key.startsWith('CognitoIdentityServiceProvider') && !key.endsWith(LocalStorageKey.RedirectUrl)) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    // Set logged in state to false
+    setLocalStorage(LocalStorageKey.LoggedIn, 'false');
+    
+    // Use Amplify's signOut for all cases
+    signOut().finally(() => {
+      // For sign out failure, do final clean up
+      const keys = Object.keys(localStorage);
+      for (const key of keys) {
+        if (!key.endsWith(LocalStorageKey.RedirectUrl)) {
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  };
 
   return (
     <div className={`${isAgentPage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isAgentPage ? 'bg-background border-b' : ''}`}>
@@ -42,6 +78,23 @@ export default function Header() {
       >
         <ModeToggle />
         <LanguageSwitcher />
+        {authUser && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={logout}
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Logout"
+            >
+              <LogOut className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

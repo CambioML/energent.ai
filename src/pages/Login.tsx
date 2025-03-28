@@ -111,7 +111,6 @@ export default function Login() {
 
           // Set logged in state
           setLocalStorage(LocalStorageKey.LoggedIn, 'true');
-          console.log('Logged in', LocalStorageKey.LoggedIn);
           
           // Navigate to the agent page
           setTimeout(() => {
