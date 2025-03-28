@@ -45,6 +45,8 @@ export interface ParsedMessageContent {
   type: 'text' | 'image' | 'tool_use' | 'tool_result';
   content: any;
   isError?: boolean;
+  tool_use_id?: string;
+  is_error?: boolean;
 }
 
 /**
@@ -71,7 +73,11 @@ export function parseAutoAgentResponse(message: string): ParsedMessageContent[] 
     // Collect all content from all messages
     const contents: ParsedMessageContent[] = [];
     
-    for (const message of messages) {
+    // Skip the first message if it's from the user
+    const startIndex = messages.length > 0 && messages[0].role === 'user' ? 1 : 0;
+    
+    for (let i = startIndex; i < messages.length; i++) {
+      const message = messages[i];
       // Process each message content
       for (const content of message.content) {
         switch (content.type) {
@@ -100,24 +106,26 @@ export function parseAutoAgentResponse(message: string): ParsedMessageContent[] 
             break;
             
           case 'tool_result':
-            // Process nested content within tool_result
-            for (const item of content.content) {
-              switch (item.type) {
-                case 'image':
-                  contents.push({
-                    type: 'image',
-                    content: item.source
-                  });
-                  break;
-                  
-                case 'text':
-                  contents.push({
+            // Create a proper tool_result entry
+            contents.push({
+              type: 'tool_result',
+              content: content.content.map(item => {
+                if (item.type === 'text') {
+                  return {
                     type: 'text',
                     content: item.text
-                  });
-                  break;
-              }
-            }
+                  };
+                } else if (item.type === 'image') {
+                  return {
+                    type: 'image',
+                    content: item.source
+                  };
+                }
+                return item;
+              }),
+              tool_use_id: content.tool_use_id,
+              is_error: content.is_error
+            });
             break;
         }
       }

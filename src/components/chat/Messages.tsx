@@ -30,14 +30,16 @@ export function Messages() {
   
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    if (!userScrolled && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (!userScrolled) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
+  }, [messages?.at(-1)?.timestamp, isTyping]);
 
   // Detect if user has scrolled up
   const handleScroll = () => {

@@ -1,37 +1,33 @@
 import { motion } from 'framer-motion';
-import { Monitor, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { LoadingDots } from '../ui/loading-dots';
+import { Monitor, AlertCircle } from 'lucide-react';
 import { useAgentStore, AgentStatus } from '@/lib/store/agent';
-import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AgentAPI } from '@/lib/api/agent-api';
 import { Button } from '@/components/ui/button';
+import { useChatStore } from '@/lib/store/chat';
 
 export default function Screen() {
-  const { agentId, status, setStatus, resetAgent } = useAgentStore();
+  const { isGenerating } = useChatStore();
+  const { agentId, status, setStatus, restartAgent } = useAgentStore();
 
   // Use React Query to poll for agent status
-  const { data, isError } = useQuery({
+  useQuery({
     queryKey: ['agentStatus', agentId],
-    queryFn: () => AgentAPI.getAgentStatus(agentId),
-    refetchInterval: status !== AgentStatus.Ready && status !== AgentStatus.Error ? 1000 : false, // Poll every second until Ready
+    queryFn: async () => {
+      const { message: status } = await AgentAPI.getAgentStatus(agentId);
+      setStatus(status as AgentStatus);
+      return status;
+    },
+    refetchInterval: !isGenerating && status !== AgentStatus.Ready && status !== AgentStatus.Error ? 1000 : false, // Poll every second until Ready
     refetchIntervalInBackground: true,
     enabled: !!agentId,
   });
 
-  // Update status when data changes or error occurs
-  useEffect(() => {
-    if (isError) {
-      setStatus(AgentStatus.Error);
-    } else if (data && data.message) {
-      setStatus(data.message as AgentStatus);
-    }
-  }, [data, isError, setStatus]);
-
   // Handler for retry
   const handleRetry = async () => {
-    await resetAgent();
+    await restartAgent();
   };
 
   return (

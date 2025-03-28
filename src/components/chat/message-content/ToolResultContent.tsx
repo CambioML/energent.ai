@@ -1,41 +1,52 @@
 import { cn } from "@/lib/utils";
-import { Check, X, FileOutput } from "lucide-react";
+import { AlertCircle, Terminal } from "lucide-react";
 import { ParsedMessageContent } from "@/lib/utils/message-parser";
-import { TextContent } from "./TextContent";
 import { ImageContent } from "./ImageContent";
 
 interface ToolResultContentProps {
   content: ParsedMessageContent[];
   isError: boolean;
+  toolUseId?: string;
 }
 
-export function ToolResultContent({ content, isError }: ToolResultContentProps) {
+export function ToolResultContent({ content, isError, toolUseId }: ToolResultContentProps) {
   return (
     <div className={cn(
-      "rounded-md p-3 flex flex-col gap-2 my-2 text-sm border",
+      "rounded-md overflow-hidden border my-3",
       isError 
-        ? "bg-destructive/10 border-destructive/30" 
-        : "bg-secondary/40 border-secondary"
+        ? "border-destructive/30" 
+        : "border-border"
     )}>
-      <div className="flex items-center gap-2">
-        <FileOutput size={14} className="text-muted-foreground" />
-        <span className="text-xs text-muted-foreground">Tool result</span>
-        {isError ? (
-          <span className="flex items-center gap-1 text-xs text-destructive">
-            <X size={12} className="text-destructive" /> Failed
+      {/* Header */}
+      <div className={cn(
+        "flex items-center justify-between px-3 py-2 text-xs font-medium",
+        isError 
+          ? "bg-destructive/10 text-destructive" 
+          : "bg-muted/80 text-muted-foreground"
+      )}>
+        <div className="flex items-center gap-2">
+          {isError ? (
+            <AlertCircle size={14} className="text-destructive" />
+          ) : (
+            <Terminal size={14} />
+          )}
+          <span>
+            {isError ? "Tool Execution Error" : "Tool Execution Result"}
           </span>
-        ) : (
-          <span className="flex items-center gap-1 text-xs text-green-500">
-            <Check size={12} className="text-green-500" /> Success
-          </span>
+        </div>
+        {toolUseId && (
+          <span className="text-xs opacity-50">{toolUseId.split('_')[1]?.substring(0, 8)}</span>
         )}
       </div>
       
-      <div className="space-y-3">
+      {/* Content */}
+      <div className="p-3 bg-muted/30">
         {content.map((item, index) => (
           <div key={index}>
             {item.type === 'text' && (
-              <TextContent content={item.content} />
+              <div className="text-xs text-muted-foreground whitespace-pre-wrap font-mono">
+                {item.content}
+              </div>
             )}
             {item.type === 'image' && (
               <ImageContent source={item.content} />
