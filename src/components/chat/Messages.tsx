@@ -1,12 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
-import { useChatStore } from "@/lib/store/chat";
-import { LoadingDots } from "@/components/ui/loading-dots";
 import { MessageItem } from "./MessageItem";
-import toast from "react-hot-toast";
-import { MessageSquare, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useAgentStore } from "@/lib/store/agent";
+import { MessageSquare, Send } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useChatStore } from "@/lib/store/useChatStore";
+import { LoadingDots } from "@/components/ui/loading-dots";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
 export function Messages() {
   const [userScrolled, setUserScrolled] = useState(false);
@@ -20,13 +19,9 @@ export function Messages() {
     currentConversationId,
     messages, 
     fetchConversation, 
-    fetchConversations,
-    createConversation,
     sendFeedback,
     messagesLoaded
   } = useChatStore();
-  
-  const { projectId, agentId } = useAgentStore();
   
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -50,29 +45,6 @@ export function Messages() {
     }
   };
   
-  // Initialize conversation if needed with useQuery
-  useQuery({
-    queryKey: ['initializeChat', projectId, agentId],
-    queryFn: async () => {
-      try {
-        if (!currentConversationId) {
-          const conversations = await fetchConversations();
-          
-          // Only create a new conversation if there are no conversations at all
-          if (Array.isArray(conversations) && conversations.length === 0) {
-            await createConversation("New Chat");
-          }
-        }
-        return true;
-      } catch (error) {
-        console.error("Failed to initialize chat:", error);
-        toast.error("Failed to initialize chat");
-        throw error;
-      }
-    },
-    enabled: !!projectId && !!agentId && !currentConversationId
-  });
-
   // Fetch conversation messages with useQuery
   useQuery({
     queryKey: ['fetchConversation', currentConversationId],

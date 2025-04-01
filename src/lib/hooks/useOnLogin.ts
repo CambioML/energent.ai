@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getIdToken, getLocalStorage, LocalStorageKey } from '../utils/local-storage';
-import { useAgentStore } from '../store/agent';
+import { useAgentStore } from '../store/useAgentStore';
 import { toast } from 'react-hot-toast';
 
 /**

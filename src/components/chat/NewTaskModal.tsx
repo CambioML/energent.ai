@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { LayoutGrid, Zap } from "lucide-react";
-import { useAgentStore } from "@/lib/store/agent";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 
 export function NewTaskModal() {
   const { isNewTaskModalOpen, closeNewTaskModal, handleNewTask } = useAgentStore();

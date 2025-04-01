@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useAgentStore } from "@/lib/store/agent";
-import { useSidebarStore } from "@/lib/store/sidebar";
+import { useAgentStore } from "@/lib/store/useAgentStore";
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
 import { NewTaskButton } from "@/components/chat/NewTaskButton";
 import { FilesSection } from "@/components/sidebar/FilesSection";
 import { UploadSection } from "@/components/sidebar/UploadSection";
 import { SidebarButton } from "@/components/sidebar/SidebarButton";
+import { SystemPromptButton } from "@/components/sidebar/SystemPromptButton";
+import { SystemPromptSection } from "@/components/sidebar/SystemPromptSection";
 import { TaskHistorySection } from "@/components/sidebar/TaskHistorySection";
 import { History, Files, Upload, PanelLeftOpen, PanelLeftClose, Zap } from "lucide-react";
 
@@ -45,7 +47,7 @@ export default function Sidebar() {
         initial="collapsed"
         animate={isExpanded ? "expanded" : "collapsed"}
         variants={sidebarVariants}
-        className="fixed left-0 top-[73px] h-[calc(100vh-73px)] bg-card border-r z-10 overflow-hidden shadow-sm"
+        className="fixed left-0 top-workspace h-workspace bg-card border-r z-10 overflow-hidden shadow-sm"
       >
         <div className="flex flex-col h-full pt-2 overflow-auto">
           {/* Section Content */}
@@ -80,6 +82,8 @@ export default function Sidebar() {
                 label="Upload"
                 onClick={() => handleButtonClick("upload")}
               />
+              
+              <SystemPromptButton />
             </div>
           ) : (
             <motion.div
@@ -104,6 +108,7 @@ export default function Sidebar() {
                 <TaskHistorySection />
                 <FilesSection />
                 <UploadSection />
+                <SystemPromptSection />
               </div>
             </motion.div>
           )}

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Message } from "@/lib/store/chat";
+import { Message } from "@/lib/store/useChatStore";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
-import { useChatStore } from "@/lib/store/chat";
+import { useChatStore } from "@/lib/store/useChatStore";
 import { MessageContent } from "./message-content/MessageContent";
 import toast from "react-hot-toast";
 

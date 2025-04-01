@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
-import { useAgentStore } from "@/lib/store/agent";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 
 interface NewTaskButtonProps {
   className?: string;
