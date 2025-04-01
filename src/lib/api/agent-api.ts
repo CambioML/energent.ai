@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { resourcesDomain, Endpoint } from './endpoints';
-import { getDefaultAgentConfig } from '../utils/agent-config';
+import { getDefaultAgentConfig, getUpdateSystemPromptConfig } from '../utils/agent-config';
 import { getUserInfo } from '../utils/local-storage';
 import { ChatAPI } from './chat-api';
 import { useAgentStore } from '../store/useAgentStore';
+import { RAGAppConfig } from '../utils/app-config/model';
 
 interface AgentAPI {
     getAgentStatus: (agentId: string) => Promise<{
@@ -17,6 +18,8 @@ interface AgentAPI {
     updateSystemPrompt: (systemPrompt: string) => Promise<void>;
     startVideoRecording: (agentId: string, conversationId: string) => Promise<{success: boolean}>;
     stopVideoRecording: (agentId: string, conversationId: string) => Promise<{success: boolean}>;
+    getCurrentBotConfig: () => Promise<RAGAppConfig>;
+    getSystemPrompt: () => Promise<string>;
 }
 
 export const AgentAPI: AgentAPI = {
@@ -185,10 +188,11 @@ export const AgentAPI: AgentAPI = {
             if (!projectId || !agentId) {
                 throw new Error('Project ID or Agent ID not set');
             }
+
+            const currentConfig = await AgentAPI.getCurrentBotConfig();
             
             // Get the configuration for updating the system prompt
-            // TODO: update the system prompt in the agent config
-            const config = getDefaultAgentConfig(projectId);
+            const config = getUpdateSystemPromptConfig(currentConfig, systemPrompt);
             
             // Call the API to update the system prompt
             const response = await axios.put(`${resourcesDomain}/ragapps/${agentId}`, config);
@@ -228,6 +232,38 @@ export const AgentAPI: AgentAPI = {
         } catch (error) {
             console.error('Failed to stop video recording:', error);
             return { success: false };
+        }
+    },
+
+    getCurrentBotConfig: async () => {
+        try {
+            const { projectId } = useAgentStore.getState();
+            if (!projectId) {
+                throw new Error('Project ID not set');
+            }
+
+            const response = await axios.get(`${resourcesDomain}/v2/projects/${projectId}/list`);
+            const ragapps = response.data.ragapps;
+            
+            if (!ragapps || ragapps.length === 0) {
+                throw new Error('No ragapps found');
+            }
+
+            // Get the first ragapp's app_meta
+            return JSON.parse(ragapps[0].app_meta);
+        } catch (error) {
+            console.error('Failed to get system prompt:', error);
+            throw error;
+        }
+    },
+
+    getSystemPrompt: async () => {
+        try {
+            const currentConfig = await AgentAPI.getCurrentBotConfig();
+            return currentConfig.chatbotUIConfig.chatbotRole;
+        } catch (error) {
+            console.error('Failed to get system prompt:', error);
+            throw error;
         }
     }
 }
