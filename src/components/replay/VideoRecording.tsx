@@ -28,12 +28,12 @@ interface VideoRecording {
 export const VideoRecording = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { projectId: currentProjectId, agentId: currentAgentId } = useAgentStore();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
   const [recordings, setRecordings] = useState<VideoRecording[]>([]);
   const [currentRecording, setCurrentRecording] = useState<VideoRecording | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const fetchRecordings = async () => {
@@ -41,7 +41,30 @@ export const VideoRecording = () => {
       
       setIsLoading(true);
       try {
-        const data = await ChatAPI.getVideoRecordings(conversationId, currentProjectId, currentAgentId);
+        // const data = await ChatAPI.getVideoRecordings(conversationId, currentProjectId, currentAgentId);
+        const data: VideoRecording[] = [
+          {
+            id: "rec_1",
+            conversationId: conversationId || "",
+            videoUrl: "https://example.com/video1.mp4",
+            timestamp: Date.now() - 3600000, // 1 hour ago
+            duration: 120 // 2 minutes
+          },
+          {
+            id: "rec_2",
+            conversationId: conversationId || "",
+            videoUrl: "https://example.com/video2.mp4",
+            timestamp: Date.now() - 7200000, // 2 hours ago
+            duration: 180 // 3 minutes
+          },
+          {
+            id: "rec_3",
+            conversationId: conversationId || "",
+            videoUrl: "https://example.com/video3.mp4",
+            timestamp: Date.now() - 10800000, // 3 hours ago
+            duration: 240 // 4 minutes
+          }
+        ];
         setRecordings(data);
         if (data.length > 0) {
           setCurrentRecording(data[0]);

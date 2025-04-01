@@ -127,5 +127,6 @@
 }
 
 @utility h-workspace {
-    height: calc(100vh - 77px);
+    min-height: calc(100vh - 77px);
+    max-height: calc(100vh - 77px);
 }

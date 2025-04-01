@@ -168,6 +168,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from fetchConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -199,6 +200,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from createConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -223,6 +225,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from deleteConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -289,6 +292,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             messages: [...state.messages, botMessage] 
           }));
         }
+      
+        set({ isGenerating: false });
       } else if (result.result && result.result['Generated Result']) {
         // Handle uncompleted messages
         const partialContent = result.result['Generated Result'];
@@ -329,7 +334,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    set({ isTyping: false, isGenerating: false });
+    set({ isTyping: false });
     setStatus(AgentStatus.Ready);
     return true;
   },

@@ -1,10 +1,11 @@
 import { MessageItem } from "./MessageItem";
 import { useQuery } from "@tanstack/react-query";
 import { MessageSquare, Send } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useChatStore } from "@/lib/store/useChatStore";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 import toast from "react-hot-toast";
 
 export function Messages() {
@@ -22,19 +23,24 @@ export function Messages() {
     sendFeedback,
     messagesLoaded
   } = useChatStore();
+
+  const { projectId, agentId } = useAgentStore();
   
   // Scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (!userScrolled) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
-  };
+  }, [userScrolled]);
+
+  // Extract the complex expression to a separate variable
+  const latestMessageTimestamp = messages?.at(-1)?.timestamp;
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages?.at(-1)?.timestamp, isTyping]);
+  }, [latestMessageTimestamp, isTyping, scrollToBottom]);
 
   // Detect if user has scrolled up
   const handleScroll = () => {
@@ -48,8 +54,11 @@ export function Messages() {
   // Fetch conversation messages with useQuery
   useQuery({
     queryKey: ['fetchConversation', currentConversationId],
-    queryFn: () => fetchConversation(currentConversationId!),
-    enabled: !!currentConversationId
+    queryFn: () => {
+      console.log('fetchConversation in Messages.tsx', currentConversationId);
+      return fetchConversation(currentConversationId!);
+    },
+    enabled: !!currentConversationId && !!projectId && !!agentId
   });
   
   const handleMessageFeedback = async (messageId: string, feedback: 'good' | 'bad') => {

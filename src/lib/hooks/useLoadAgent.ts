@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 /**
  * Hook to handle initialization tasks when a user logs in
  */
-export function useOnLogin() {
+export function useLoadAgent() {
   const initializeAgent = useAgentStore(state => state.initializeAgent);
 
   useEffect(() => {
@@ -25,7 +25,6 @@ export function useOnLogin() {
           } catch (err) {
             console.error('Failed to initialize agent:', err);
             toast.error('Failed to initialize agent. Please refresh and try again.');
-          } finally {
           }
         };
 

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { AgentAPI } from "@/lib/api/agent-api";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 
 interface SystemPromptModalProps {
   isOpen: boolean;
@@ -24,8 +25,8 @@ export const SystemPromptModal = ({
   isOpen,
   onClose,
 }: SystemPromptModalProps) => {
-  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { systemPrompt, setSystemPrompt } = useAgentStore();
 
   const handleSave = async () => {
     if (!systemPrompt.trim()) {

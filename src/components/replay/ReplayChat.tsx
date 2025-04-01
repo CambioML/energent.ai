@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { useChatStore } from '@/lib/store/useChatStore';
-import { Messages } from './Messages';
 import { Clock } from 'lucide-react';
+import { Messages } from '../chat/Messages';
 
 export default function ReplayChat() {
   return (
@@ -11,7 +10,7 @@ export default function ReplayChat() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
-      className="w-full flex flex-col rounded-lg border h-[calc(100vh-100px)] overflow-hidden"
+      className="h-full w-full flex flex-col rounded-lg border overflow-hidden"
     >
       <div className="flex-1 overflow-hidden">
         <Messages />

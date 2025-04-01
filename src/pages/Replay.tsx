@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { VideoRecording } from '@/components/screen/VideoRecording';
+import { VideoRecording } from '@/components/replay/VideoRecording';
 import { useChatStore } from '@/lib/store/useChatStore';
 import { Clock } from 'lucide-react';
 import { 
@@ -9,15 +9,21 @@ import {
   ResizableHandle,
   ResizablePanelGroup 
 } from '@/components/ui/resizable';
-import { useOnLogin } from '@/lib/hooks/useOnLogin';
+import { useLoadAgent } from '@/lib/hooks/useLoadAgent';
 import Sidebar from '@/components/sidebar/Sidebar';
-import ReplayChat from '@/components/chat/ReplayChat';
+import ReplayChat from '@/components/replay/ReplayChat';
 import StatusIndicator from '@/components/screen/StatusIndicator';
 import StopAgentButton from '@/components/screen/StopAgentButton';
+import { useAgentStore } from '@/lib/store/useAgentStore';
 
 export default function Replay() {
   // Initialize agent on login
-  useOnLogin();
+  useLoadAgent();
+
+  useEffect(() => {
+    const { setHistoryMode } = useAgentStore.getState();
+    setHistoryMode(true);
+  }, []);
 
   const { conversationId } = useParams<{ conversationId: string }>();
   const { 
@@ -39,7 +45,7 @@ export default function Replay() {
   );
 
   return (
-    <div className="min-h-workspace max-h-workspace overflow-hidden flex flex-col bg-background">
+    <div className="h-workspace overflow-hidden flex flex-col bg-background">
       {/* Sidebar */}
       <Sidebar />
       
@@ -51,7 +57,7 @@ export default function Replay() {
             defaultSize={35} 
             minSize={20} 
             maxSize={60}
-            className="p-4"
+            className="p-4 h-workspace"
           >
             <div className="flex flex-col h-full w-full overflow-hidden gap-3">
               <motion.div 
@@ -75,8 +81,8 @@ export default function Replay() {
           <ResizableHandle withHandle />
           
           {/* Right side: Video recording */}
-          <ResizablePanel className="p-4">
-            <div className="flex flex-col w-full h-full gap-3">
+          <ResizablePanel className="p-4 h-workspace">
+            <div className="h-full flex flex-col w-full gap-3">
               <div className="flex justify-between items-center">
                 <StatusIndicator />
                 <StopAgentButton />

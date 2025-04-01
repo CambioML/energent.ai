@@ -3,21 +3,28 @@ import Screen from '@/components/screen/Screen';
 import Sidebar from '@/components/sidebar/Sidebar';
 import StatusIndicator from '@/components/screen/StatusIndicator';
 import StopAgentButton from '@/components/screen/StopAgentButton';
+import { useEffect } from 'react';
 import { NewTaskModal } from '@/components/chat/NewTaskModal';
-import { useOnLogin } from '@/lib/hooks/useOnLogin';
+import { useLoadAgent } from '@/lib/hooks/useLoadAgent';
 import { 
   ResizablePanel, 
   ResizableHandle,
   ResizablePanelGroup 
 } from '@/components/ui/resizable';
 import RecordingIndicator from '@/components/screen/RecordingIndicator';
+import { useAgentStore } from '@/lib/store/useAgentStore';
 
 export default function Agent() {
   // Initialize agent on login
-  useOnLogin();
+  useLoadAgent();
+
+  useEffect(() => {
+    const { setHistoryMode } = useAgentStore.getState();
+    setHistoryMode(false);
+  }, []);
 
   return (
-    <div className="min-h-workspace max-h-workspace overflow-hidden flex flex-col bg-background">
+    <div className="h-workspace overflow-hidden flex flex-col bg-background">
       {/* Sidebar */}
       <Sidebar />
       
@@ -29,7 +36,7 @@ export default function Agent() {
             defaultSize={35} 
             minSize={20} 
             maxSize={60}
-            className="p-4"
+            className="p-4 h-workspace"
           >
             <div className="flex flex-col h-full w-full overflow-hidden gap-3">
               <Chat />
@@ -39,7 +46,7 @@ export default function Agent() {
           <ResizableHandle withHandle />
           
           {/* Right side: Screen */}
-          <ResizablePanel className="p-4">
+          <ResizablePanel className="p-4 h-workspace">
             <div className="flex flex-col w-full h-full gap-3">
               <div className="flex justify-between items-center">
                 <div className='flex items-center gap-2'>

@@ -10,6 +10,10 @@ import { SystemPromptButton } from "@/components/sidebar/SystemPromptButton";
 import { SystemPromptSection } from "@/components/sidebar/SystemPromptSection";
 import { TaskHistorySection } from "@/components/sidebar/TaskHistorySection";
 import { History, Files, Upload, PanelLeftOpen, PanelLeftClose, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AgentAPI } from "@/lib/api/agent-api";
+import { useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function Sidebar() {
   const { 
@@ -17,7 +21,26 @@ export default function Sidebar() {
     handleButtonClick, 
     toggleSidebar
   } = useSidebarStore();
-  const { openNewTaskModal } = useAgentStore();
+  const { openNewTaskModal, setSystemPrompt, projectId, agentId } = useAgentStore();
+
+  const location = useLocation();
+
+  // Load system prompt
+  useQuery({
+    queryKey: ['systemPrompt'],
+    queryFn: async () => {
+      try {
+        const prompt = await AgentAPI.getSystemPrompt();
+        setSystemPrompt(prompt);
+        return prompt;
+      } catch (error) {
+        console.error("Failed to load system prompt:", error);
+        toast.error("Failed to load system prompt");
+        throw error;
+      }
+    },
+    enabled: Boolean(projectId && agentId)
+  });
 
   // Animation variants
   const sidebarVariants = {
@@ -29,6 +52,14 @@ export default function Sidebar() {
       width: "90px",
       transition: { duration: 0.2, ease: "easeInOut" },
     },
+  };
+
+  const handleNewTask = () => {
+    if (location.pathname.startsWith("/history")) {
+      window.location.href = "/agent";
+    } else {
+      openNewTaskModal();
+    }
   };
 
   return (
@@ -49,7 +80,7 @@ export default function Sidebar() {
         variants={sidebarVariants}
         className="fixed left-0 top-workspace h-workspace bg-card border-r z-10 overflow-hidden shadow-sm"
       >
-        <div className="flex flex-col h-full pt-2 overflow-auto">
+        <div className="flex flex-col h-workspace pt-2 overflow-auto">
           {/* Section Content */}
           {!isExpanded ? (
             <div className="flex flex-col justify-center gap-2 px-2 mb-4">
@@ -62,7 +93,7 @@ export default function Sidebar() {
               <SidebarButton
                 icon={<Zap className="size-5" />}
                 label="New Task"
-                onClick={openNewTaskModal}
+                onClick={handleNewTask}
               />
 
               <SidebarButton

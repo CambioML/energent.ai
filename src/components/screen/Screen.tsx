@@ -64,6 +64,10 @@ export default function Screen() {
           </div>
         ) : (
           <>
+            {/* Recording indicator overlay */}
+            <div className="absolute top-3 left-3 z-10">
+              <RecordingIndicator />
+            </div>
             {/* Computer iframe */}
             <div className="flex-1 relative">
               <iframe

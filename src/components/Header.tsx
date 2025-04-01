@@ -2,18 +2,17 @@ import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Link, useLocation } from 'react-router-dom';
 import { ModeToggle } from './ModeToggle';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
+import { getLocalStorage, LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
 import { signOut } from 'aws-amplify/auth';
 import { usePostHog } from 'posthog-js/react';
 
 export default function Header() {
   const location = useLocation();
   const isWorkspacePage = location.pathname.startsWith('/agent') || location.pathname.startsWith('/history');
-  const { user: authUser } = useAuthenticator(context => [context.user]);
   const posthog = usePostHog();
+  const isLoggedIn = getLocalStorage(LocalStorageKey.LoggedIn) === 'true';
 
   const logout = () => {
     // Reset PostHog if needed
@@ -78,7 +77,7 @@ export default function Header() {
       >
         <ModeToggle />
         <LanguageSwitcher />
-        {authUser && (
+        {isLoggedIn && (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -88,7 +87,7 @@ export default function Header() {
               variant="ghost" 
               size="icon" 
               onClick={logout}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-primary hover:text-primary transition-colors"
               aria-label="Logout"
             >
               <LogOut className="h-[1.2rem] w-[1.2rem]" />
