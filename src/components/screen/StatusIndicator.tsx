@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAgentStore, AgentStatus } from '@/lib/store/agent';
+import { useAgentStore, AgentStatus } from '@/lib/store/useAgentStore';
 
 export default function StatusIndicator() {
   const { status } = useAgentStore();

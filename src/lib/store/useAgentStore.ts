@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useChatStore } from './chat';
+import { useChatStore } from './useChatStore';
 import { AgentAPI } from '../api/agent-api';
 
 export enum AgentStatus {
@@ -15,10 +15,12 @@ type AgentState = {
   status: AgentStatus;
   taskName: string;
   isNewTaskModalOpen: boolean;
+  isRecordingVideo: boolean;
   setProjectId: (id: string) => void;
   setAgentId: (id: string) => void;
   setStatus: (status: AgentStatus) => void;
   setTaskName: (name: string) => void;
+  setIsRecordingVideo: (isRecording: boolean) => void;
   stopAgent: () => Promise<void>;
   restartAgent: () => Promise<void>;
   openNewTaskModal: () => void;
@@ -35,10 +37,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   status: AgentStatus.Starting,
   taskName: "Task Name 1",
   isNewTaskModalOpen: false,
+  isRecordingVideo: false,
   setProjectId: (id) => set({ projectId: id }),
   setAgentId: (id) => set({ agentId: id }),
   setStatus: (status) => set({ status }),
   setTaskName: (name) => set({ taskName: name }),
+  setIsRecordingVideo: (isRecording) => set({ isRecordingVideo: isRecording }),
   stopAgent: async () => {
     const { agentId } = get();
     await AgentAPI.stopAgent(agentId);
@@ -71,7 +75,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     
     const conversationId = await chatStore.createConversation(newTaskName, projectId, agentId);
     chatStore.setCurrentConversationId(conversationId);
-    chatStore.fetchConversation(conversationId);
     console.log(`New conversation created with ID: ${conversationId}`);
   },
   initializeAgent: async () => {

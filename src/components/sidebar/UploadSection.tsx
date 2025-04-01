@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useSidebarStore } from "@/lib/store/sidebar";
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
 import { ChatAPI } from "@/lib/api/chat-api";
 import {
   Accordion,
@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useAgentStore } from "@/lib/store/agent";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 interface UploadedFile extends File {
   preview?: string;
 }

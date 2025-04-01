@@ -1,6 +1,6 @@
 import { Laptop, MessageSquare } from 'lucide-react';
-import { useSidebarStore } from "@/lib/store/sidebar";
-import { useChatStore } from "@/lib/store/chat";
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
+import { useChatStore } from "@/lib/store/useChatStore";
 import {
   Accordion,
   AccordionContent,
@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useNavigate } from 'react-router-dom';
-import { useAgentStore } from '@/lib/store/agent';
+import { useAgentStore } from '@/lib/store/useAgentStore';
 import { useQuery } from '@tanstack/react-query';
 
 export const TaskHistorySection = () => {

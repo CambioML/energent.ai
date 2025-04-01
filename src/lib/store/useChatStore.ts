@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ChatAPI } from '../api/chat-api';
-import { AgentStatus, useAgentStore } from './agent';
+import { AgentStatus, useAgentStore } from './useAgentStore';
 import toast from 'react-hot-toast';
 
 export interface Message {
@@ -28,6 +28,7 @@ interface ChatState {
   isTyping: boolean;
   messagesLoaded: boolean;
   isGenerating: boolean;
+
   // Actions
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
@@ -231,7 +232,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       // Reset current conversation if we deleted the active one
       if (currentConversationId === conversationId) {
-        setCurrentConversationId(null);
+        const newConversationId = await get().createConversation('New Chat');
+        setCurrentConversationId(newConversationId);
       }
     } catch (error) {
       console.error('Error deleting conversation:', error);

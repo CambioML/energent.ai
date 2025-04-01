@@ -3,6 +3,7 @@ import { resourcesDomain, Endpoint } from './endpoints';
 import { getDefaultAgentConfig } from '../utils/agent-config';
 import { getUserInfo } from '../utils/local-storage';
 import { ChatAPI } from './chat-api';
+import { useAgentStore } from '../store/useAgentStore';
 
 interface AgentAPI {
     getAgentStatus: (agentId: string) => Promise<{
@@ -13,6 +14,9 @@ interface AgentAPI {
     getAgentId: (projectId: string) => Promise<string | null>;
     stopAgent: (agentId: string) => Promise<void>;
     restartAgent: (agentId: string) => Promise<void>;
+    updateSystemPrompt: (systemPrompt: string) => Promise<void>;
+    startVideoRecording: (agentId: string, conversationId: string) => Promise<{success: boolean}>;
+    stopVideoRecording: (agentId: string, conversationId: string) => Promise<{success: boolean}>;
 }
 
 export const AgentAPI: AgentAPI = {
@@ -171,6 +175,59 @@ export const AgentAPI: AgentAPI = {
         } catch (error) {
             console.error('Failed to restart agent:', error);
             throw error;
+        }
+    },
+    
+    updateSystemPrompt: async (systemPrompt: string) => {
+        try {
+            const { projectId, agentId } = useAgentStore.getState();
+            
+            if (!projectId || !agentId) {
+                throw new Error('Project ID or Agent ID not set');
+            }
+            
+            // Get the configuration for updating the system prompt
+            // TODO: update the system prompt in the agent config
+            const config = getDefaultAgentConfig(projectId);
+            
+            // Call the API to update the system prompt
+            const response = await axios.put(`${resourcesDomain}/ragapps/${agentId}`, config);
+            console.log('System prompt updated:', response.data);
+            
+            return response.data;
+        } catch (error) {
+            console.error('Failed to update system prompt:', error);
+            throw error;
+        }
+    },
+    
+    startVideoRecording: async (agentId: string, conversationId: string) => {
+        try {
+            // TODO: Implement actual API call
+            console.log(`Starting video recording for agent ${agentId} and conversation ${conversationId}`);
+            
+            // Mock response
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Failed to start video recording:', error);
+            return { success: false };
+        }
+    },
+    
+    stopVideoRecording: async (agentId: string, conversationId: string) => {
+        try {
+            // TODO: Implement actual API call
+            console.log(`Stopping video recording for agent ${agentId} and conversation ${conversationId}`);
+            
+            // Mock response
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Failed to stop video recording:', error);
+            return { success: false };
         }
     }
 }

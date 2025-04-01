@@ -1,5 +1,5 @@
 import { Files } from 'lucide-react';
-import { useSidebarStore } from "@/lib/store/sidebar";
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
 import {
   Accordion,
   AccordionContent,

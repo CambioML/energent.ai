@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { StopCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAgentStore, AgentStatus } from '@/lib/store/agent';
+import { useAgentStore, AgentStatus } from '@/lib/store/useAgentStore';
 import { toast } from 'react-hot-toast';
 
 export default function StopAgentButton() {

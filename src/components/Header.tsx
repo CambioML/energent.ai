@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Link, useLocation } from 'react-router-dom';
-import { ModeToggle } from './mode-toggle';
+import { ModeToggle } from './ModeToggle';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { usePostHog } from 'posthog-js/react';
 
 export default function Header() {
   const location = useLocation();
-  const isAgentPage = location.pathname.startsWith('/agent');
+  const isWorkspacePage = location.pathname.startsWith('/agent') || location.pathname.startsWith('/history');
   const { user: authUser } = useAuthenticator(context => [context.user]);
   const posthog = usePostHog();
 
@@ -44,9 +44,9 @@ export default function Header() {
   };
 
   return (
-    <div className={`${isAgentPage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isAgentPage ? 'bg-background border-b' : ''}`}>
+    <div className={`${isWorkspacePage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isWorkspacePage ? 'bg-background border-b' : ''}`}>
       {/* Blur effect layers - only shown on non-agent pages */}
-      {!isAgentPage && (
+      {!isWorkspacePage && (
         <>
           <div className="pointer-events-none absolute inset-0 z-[1] h-[20vh] backdrop-blur-[0.0625px] [mask-image:linear-gradient(0deg,transparent_0%,#000_12.5%,#000_25%,transparent_37.5%)]"></div>
           <div className="pointer-events-none absolute inset-0 z-[2] h-[20vh] backdrop-blur-[0.125px] [mask-image:linear-gradient(0deg,transparent_12.5%,#000_25%,#000_37.5%,transparent_50%)]"></div>

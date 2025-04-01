@@ -33,6 +33,14 @@ interface Organization {
   };
 }
 
+interface VideoRecording {
+  id: string;
+  conversationId: string;
+  videoUrl: string;
+  timestamp: number;
+  duration: number;
+}
+
 interface ChatAPI {
     getConversation: (conversationId: string, projectId: string, agentId: string) => Promise<any>;
     getConversations: (projectId: string, agentId: string) => Promise<any>;
@@ -46,6 +54,7 @@ interface ChatAPI {
     uploadFile: (file: File, agentId: string) => Promise<FileUploadResponse>;
     listOrganizations: () => Promise<Organization[]>;
     createOrganization: (name: string) => Promise<Organization>;
+    getVideoRecordings: (conversationId: string, projectId: string, agentId: string) => Promise<VideoRecording[]>;
 }
 
 // Chat API endpoints
@@ -186,5 +195,11 @@ export const ChatAPI: ChatAPI = {
       console.error("Error creating organization:", error);
       throw error;
     }
+  },
+
+  // Get video recordings for a conversation
+  getVideoRecordings: async (conversationId: string, projectId: string, agentId: string) => {
+    const response = await axios.get(`${Endpoint.chatbotApp}/recordings/${projectId}/${agentId}/${conversationId}`);
+    return response.data;
   },
 }; 

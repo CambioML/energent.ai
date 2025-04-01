@@ -10,13 +10,14 @@ import {
   ResizableHandle,
   ResizablePanelGroup 
 } from '@/components/ui/resizable';
+import RecordingIndicator from '@/components/screen/RecordingIndicator';
 
 export default function Agent() {
   // Initialize agent on login
   useOnLogin();
 
   return (
-    <div className="min-h-[calc(100vh-73px)] max-h-[calc(100vh-73px)] overflow-hidden flex flex-col bg-background">
+    <div className="min-h-workspace max-h-workspace overflow-hidden flex flex-col bg-background">
       {/* Sidebar */}
       <Sidebar />
       
@@ -40,8 +41,11 @@ export default function Agent() {
           {/* Right side: Screen */}
           <ResizablePanel className="p-4">
             <div className="flex flex-col w-full h-full gap-3">
-              <div className="flex justify-between">
-                <StatusIndicator />
+              <div className="flex justify-between items-center">
+                <div className='flex items-center gap-2'>
+                  <StatusIndicator />
+                  <RecordingIndicator />
+                </div>
                 <StopAgentButton />
               </div>
               <Screen />

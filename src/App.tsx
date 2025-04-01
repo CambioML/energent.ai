@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Login from './pages/Login';
 import Agent from './pages/Agent';
-import RecordingReplay from './pages/RecordingReplay';
+import Replay from './pages/Replay';
 import Header from './components/Header';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
@@ -10,7 +10,7 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getAnonymousToken, getIdToken, LocalStorageKey, setLocalStorage } from './lib/utils/local-storage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './components/ThemeProvider';
 import './i18n';
 
 function AppContent() {
@@ -90,7 +90,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/agent" element={<Agent />} />
-        <Route path="/history/:conversationId" element={<RecordingReplay />} />
+        <Route path="/history/:conversationId" element={<Replay />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
