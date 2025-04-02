@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ChatAPI } from '../api/chat-api';
-import { AgentStatus, useAgentStore } from './agent';
+import { AgentStatus, useAgentStore } from './useAgentStore';
 import toast from 'react-hot-toast';
 
 export interface Message {
@@ -28,6 +28,7 @@ interface ChatState {
   isTyping: boolean;
   messagesLoaded: boolean;
   isGenerating: boolean;
+
   // Actions
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
@@ -167,6 +168,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from fetchConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -198,6 +200,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from createConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -222,6 +225,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     if (!projectId || !agentId) {
       toast.error('Project ID or Agent ID not set');
+      console.error('from deleteConversation', projectId, agentId);
       throw new Error('Project ID or Agent ID not set');
     }
     
@@ -231,7 +235,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       // Reset current conversation if we deleted the active one
       if (currentConversationId === conversationId) {
-        setCurrentConversationId(null);
+        const newConversationId = await get().createConversation('New Chat');
+        setCurrentConversationId(newConversationId);
       }
     } catch (error) {
       console.error('Error deleting conversation:', error);
@@ -287,6 +292,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             messages: [...state.messages, botMessage] 
           }));
         }
+      
+        set({ isGenerating: false });
       } else if (result.result && result.result['Generated Result']) {
         // Handle uncompleted messages
         const partialContent = result.result['Generated Result'];
@@ -327,7 +334,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    set({ isTyping: false, isGenerating: false });
+    set({ isTyping: false });
     setStatus(AgentStatus.Ready);
     return true;
   },

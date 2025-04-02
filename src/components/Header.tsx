@@ -1,19 +1,18 @@
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Link, useLocation } from 'react-router-dom';
-import { ModeToggle } from './mode-toggle';
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import { ModeToggle } from './ModeToggle';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
+import { getLocalStorage, LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
 import { signOut } from 'aws-amplify/auth';
 import { usePostHog } from 'posthog-js/react';
 
 export default function Header() {
   const location = useLocation();
-  const isAgentPage = location.pathname.startsWith('/agent');
-  const { user: authUser } = useAuthenticator(context => [context.user]);
+  const isWorkspacePage = location.pathname.startsWith('/agent') || location.pathname.startsWith('/history');
   const posthog = usePostHog();
+  const isLoggedIn = getLocalStorage(LocalStorageKey.LoggedIn) === 'true';
 
   const logout = () => {
     // Reset PostHog if needed
@@ -44,9 +43,9 @@ export default function Header() {
   };
 
   return (
-    <div className={`${isAgentPage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isAgentPage ? 'bg-background border-b' : ''}`}>
+    <div className={`${isWorkspacePage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isWorkspacePage ? 'bg-background border-b' : ''}`}>
       {/* Blur effect layers - only shown on non-agent pages */}
-      {!isAgentPage && (
+      {!isWorkspacePage && (
         <>
           <div className="pointer-events-none absolute inset-0 z-[1] h-[20vh] backdrop-blur-[0.0625px] [mask-image:linear-gradient(0deg,transparent_0%,#000_12.5%,#000_25%,transparent_37.5%)]"></div>
           <div className="pointer-events-none absolute inset-0 z-[2] h-[20vh] backdrop-blur-[0.125px] [mask-image:linear-gradient(0deg,transparent_12.5%,#000_25%,#000_37.5%,transparent_50%)]"></div>
@@ -78,7 +77,7 @@ export default function Header() {
       >
         <ModeToggle />
         <LanguageSwitcher />
-        {authUser && (
+        {isLoggedIn && (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -88,7 +87,7 @@ export default function Header() {
               variant="ghost" 
               size="icon" 
               onClick={logout}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-primary hover:text-primary transition-colors"
               aria-label="Logout"
             >
               <LogOut className="h-[1.2rem] w-[1.2rem]" />

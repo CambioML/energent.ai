@@ -1,8 +1,7 @@
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAgentStore, AgentStatus } from '@/lib/store/agent';
+import { useAgentStore, AgentStatus } from '@/lib/store/useAgentStore';
 
 export default function StatusIndicator() {
   const { status } = useAgentStore();
@@ -19,9 +18,7 @@ export default function StatusIndicator() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div 
       className="flex items-center gap-2"
     >
       <Button 
@@ -47,6 +44,6 @@ export default function StatusIndicator() {
           )} 
         />
       </Button>
-    </motion.div>
+    </div>
   );
 }

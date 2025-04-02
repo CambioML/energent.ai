@@ -16,7 +16,7 @@ import { getFormFields } from '@/i18n';
 import { lightTheme, darkTheme } from '@/config/amplify';
 import { Endpoint } from '@/lib/api/endpoints';
 import { LocalStorageKey, setLocalStorage } from '@/lib/utils/local-storage';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme } from '@/components/ThemeProvider';
 import keys from '@/i18n/keys';
 
 import '@aws-amplify/ui-react/styles.css';

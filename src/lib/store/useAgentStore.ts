@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { useChatStore } from './chat';
+import { useChatStore } from './useChatStore';
 import { AgentAPI } from '../api/agent-api';
+import toast from 'react-hot-toast';
 
 export enum AgentStatus {
   Starting = 'Starting',
@@ -10,15 +11,20 @@ export enum AgentStatus {
 }
 
 type AgentState = {
+  historyMode: boolean;
   projectId: string;
   agentId: string;
   status: AgentStatus;
   taskName: string;
   isNewTaskModalOpen: boolean;
+  isRecordingVideo: boolean;
+  systemPrompt: string;
   setProjectId: (id: string) => void;
   setAgentId: (id: string) => void;
   setStatus: (status: AgentStatus) => void;
   setTaskName: (name: string) => void;
+  setIsRecordingVideo: (isRecording: boolean) => void;
+  setSystemPrompt: (prompt: string) => void;
   stopAgent: () => Promise<void>;
   restartAgent: () => Promise<void>;
   openNewTaskModal: () => void;
@@ -27,18 +33,25 @@ type AgentState = {
   initializeAgent: () => Promise<void>;
   initializeProjectId: () => Promise<string>;
   initializeAgentId: () => Promise<string>;
+  setHistoryMode: (mode: boolean) => void;
 };
 
 export const useAgentStore = create<AgentState>((set, get) => ({
+  historyMode: false,
   projectId: '',
   agentId: '',
   status: AgentStatus.Starting,
   taskName: "Task Name 1",
   isNewTaskModalOpen: false,
-  setProjectId: (id) => set({ projectId: id }),
-  setAgentId: (id) => set({ agentId: id }),
+  isRecordingVideo: false,
+  systemPrompt: '',
   setStatus: (status) => set({ status }),
+  setAgentId: (id) => set({ agentId: id }),
+  setProjectId: (id) => set({ projectId: id }),
   setTaskName: (name) => set({ taskName: name }),
+  setHistoryMode: (mode) => set({ historyMode: mode }),
+  setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
+  setIsRecordingVideo: (isRecording) => set({ isRecordingVideo: isRecording }),
   stopAgent: async () => {
     const { agentId } = get();
     await AgentAPI.stopAgent(agentId);
@@ -52,27 +65,34 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   openNewTaskModal: () => set({ isNewTaskModalOpen: true }),
   closeNewTaskModal: () => set({ isNewTaskModalOpen: false }),
   handleNewTask: async (keepLayout: boolean) => {
-    // Generate a new task name
-    const newTaskName = `New Task ${Date.now()}`;
-    console.log("keepLayout", keepLayout);
+    const loadingToast = toast.loading("Creating new task...");
+    try {
+      // Generate a new task name
+      const newTaskName = `New Task ${Date.now()}`;
+      console.log("keepLayout", keepLayout);
 
-    if (!keepLayout) {
-      await get().restartAgent()
-      // Update agent store
-      set({ 
-        status: AgentStatus.Starting,
-        taskName: newTaskName,
-      });
+      if (!keepLayout) {
+        await get().restartAgent()
+        // Update agent store
+        set({ 
+          status: AgentStatus.Starting,
+          taskName: newTaskName,
+        });
+      }
+      
+      // Create a new conversation in the chat store
+      const chatStore = useChatStore.getState();
+      const { projectId, agentId } = get();
+      
+      const conversationId = await chatStore.createConversation(newTaskName, projectId, agentId);
+      chatStore.setCurrentConversationId(conversationId);
+      console.log(`New conversation created with ID: ${conversationId}`);
+      toast.success("New task created", { id: loadingToast });
+    } catch (error) {
+      console.error('Error creating new task:', error);
+      toast.error('Failed to create new task', { id: loadingToast });
+      set({ status: AgentStatus.Error });
     }
-    
-    // Create a new conversation in the chat store
-    const chatStore = useChatStore.getState();
-    const { projectId, agentId } = get();
-    
-    const conversationId = await chatStore.createConversation(newTaskName, projectId, agentId);
-    chatStore.setCurrentConversationId(conversationId);
-    chatStore.fetchConversation(conversationId);
-    console.log(`New conversation created with ID: ${conversationId}`);
   },
   initializeAgent: async () => {
     await get().initializeProjectId();

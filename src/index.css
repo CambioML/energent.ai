@@ -121,3 +121,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility t-workspace {
+    top: 77px;
+}
+
+@utility h-workspace {
+    min-height: calc(100vh - 77px);
+    max-height: calc(100vh - 77px);
+}

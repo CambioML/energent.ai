@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Message } from "@/lib/store/chat";
+import { Message } from "@/lib/store/useChatStore";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ThumbsUp, ThumbsDown, User, Bot, Copy, Share2, Pencil, Check, X, Loader2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, User, Bot, Copy, Pencil, Check, X, Loader2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +12,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
-import { useChatStore } from "@/lib/store/chat";
+import { useChatStore } from "@/lib/store/useChatStore";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 import { MessageContent } from "./message-content/MessageContent";
 import toast from "react-hot-toast";
 
@@ -23,14 +24,15 @@ interface MessageItemProps {
     feedback: "good" | "bad",
     additionalFeedback?: string
   ) => void;
-  historyMode?: boolean;
 }
 
-export function MessageItem({ message, onFeedback, historyMode = false }: MessageItemProps) {
+export function MessageItem({ message, onFeedback }: MessageItemProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedContent, setEditedContent] = useState(message.content);
   const [isSaving, setIsSaving] = useState(false);
+  const [editedContent, setEditedContent] = useState(message.content);
+  
+  const { historyMode } = useAgentStore();
   const { updateMessage } = useChatStore();
 
   // Reset copy state after 2 seconds
@@ -48,22 +50,6 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
     navigator.clipboard.writeText(message.content);
     setIsCopied(true);
     toast.success("Message copied to clipboard");
-  };
-
-  const shareMessage = () => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: "Shared Message",
-          text: message.content,
-        })
-        .catch((error) => {
-          console.error("Error sharing message:", error);
-        });
-    } else {
-      copyToClipboard();
-      toast("Link copied, you can now paste and share it");
-    }
   };
 
   const handleEdit = () => {
@@ -211,25 +197,7 @@ export function MessageItem({ message, onFeedback, historyMode = false }: Messag
               </Tooltip>
             </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={shareMessage}
-                  >
-                    <Share2 size={14} className="text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share message</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {onFeedback && !historyMode && (
+            {onFeedback && (
               <>
                 <TooltipProvider>
                   <Tooltip>

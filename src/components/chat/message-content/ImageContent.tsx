@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Endpoint } from "@/lib/api/endpoints";
 import { cn } from "@/lib/utils";
-import { useAgentStore } from "@/lib/store/agent";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 
 interface ImageContentProps {
   source: string;
