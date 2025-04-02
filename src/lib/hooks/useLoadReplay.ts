@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { getIdToken, getLocalStorage, LocalStorageKey } from '../utils/local-storage';
 import { toast } from 'react-hot-toast';
 import { useReplayStore } from '../store/useReplayStore';
+import { getIdToken, getLocalStorage, LocalStorageKey } from '../utils/local-storage';
 
 /**
  * Hook to handle initialization tasks when a user logs in

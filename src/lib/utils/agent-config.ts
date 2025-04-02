@@ -1,7 +1,7 @@
-import { DefaultEnableHyDE, DefaultChatbotRole, DefaultQueryRewriteLLM, DefaultHyDEPromptTemplate, DefaultChatboxPlaceholder, DefaultEnableFollowUpQuestions, DefaultFollowUpQuestionPrompt, DefaultFollowUpQuestionsLLM, DefaultHideEpsillaLogo, DefaultEnableReranker, DefaultOpenChatMessage, DefaultSampleQuestions, DefaultConversationSummaryType, DefaultAllowShare, DefaultTimeout, DefaultCollectFeedback, DefaultChatLLM, DefaultQueryRewritePromptTemplate, DefaultEnableQueryRewrite, DefaultChatHistoryChatWindowBufferConfig, DefaultPromptTemplate, DefaultRerankerConfig, DefaultHyDELLM, DefaultPrimaryColor, DefaultWebSearchTavilyConfig, DefaultChatUploadFileConfig } from "./app-config/contants";
-import { GetAutoAgentConfig } from "./app-config/get-auto-agent-config";
 import { v4 as uuidv4 } from 'uuid';
 import { RAGAppConfig } from "./app-config/model";
+import { GetAutoAgentConfig } from "./app-config/get-auto-agent-config";
+import { DefaultEnableHyDE, DefaultChatbotRole, DefaultQueryRewriteLLM, DefaultHyDEPromptTemplate, DefaultChatboxPlaceholder, DefaultEnableFollowUpQuestions, DefaultFollowUpQuestionPrompt, DefaultFollowUpQuestionsLLM, DefaultHideEpsillaLogo, DefaultEnableReranker, DefaultOpenChatMessage, DefaultSampleQuestions, DefaultConversationSummaryType, DefaultAllowShare, DefaultTimeout, DefaultCollectFeedback, DefaultChatLLM, DefaultQueryRewritePromptTemplate, DefaultEnableQueryRewrite, DefaultChatHistoryChatWindowBufferConfig, DefaultPromptTemplate, DefaultRerankerConfig, DefaultHyDELLM, DefaultPrimaryColor, DefaultWebSearchTavilyConfig, DefaultChatUploadFileConfig } from "./app-config/contants";
 
 /**
  * Default configuration for creating a new agent

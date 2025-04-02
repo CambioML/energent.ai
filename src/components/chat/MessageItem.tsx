@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { useChatStore } from "@/lib/store/useChatStore";
+import { useAgentStore } from "@/lib/store/useAgentStore";
 import { MessageContent } from "./message-content/MessageContent";
 import toast from "react-hot-toast";
-import { useAgentStore } from "@/lib/store/useAgentStore";
 
 interface MessageItemProps {
   message: Message;

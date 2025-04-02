@@ -10,11 +10,9 @@ import {
   ResizablePanelGroup 
 } from '@/components/ui/resizable';
 import { useLoadAgent } from '@/lib/hooks/useLoadAgent';
+import { useAgentStore } from '@/lib/store/useAgentStore';
 import Sidebar from '@/components/sidebar/Sidebar';
 import ReplayChat from '@/components/replay/ReplayChat';
-import StatusIndicator from '@/components/screen/StatusIndicator';
-import StopAgentButton from '@/components/screen/StopAgentButton';
-import { useAgentStore } from '@/lib/store/useAgentStore';
 
 export default function Replay() {
   // Initialize agent on login
@@ -83,10 +81,6 @@ export default function Replay() {
           {/* Right side: Video recording */}
           <ResizablePanel className="p-4 h-workspace">
             <div className="h-full flex flex-col w-full gap-3">
-              <div className="flex justify-between items-center">
-                <StatusIndicator />
-                <StopAgentButton />
-              </div>
               <VideoRecording />
             </div>
           </ResizablePanel>

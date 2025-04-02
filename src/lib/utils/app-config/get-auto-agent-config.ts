@@ -11,11 +11,11 @@ import {
   RetrieverConfig,
   WebSearchTavilyConfig,
 } from "./model";
-import { CreateWindowBufferChatHistoryComponentConfig } from "./window-buffer-chat-history";
-import { CreatePipelineOutputComponentConfig } from "./pipeline/pipeline-output";
 import { CreateUserInputComponentConfig } from "./pipeline/user-input";
-import { AddNewComponentToRAGAppConfig, UpsertComponentInputSource } from "./shared";
 import { createAutoAgentComponentConfig } from "./auto-agent";
+import { CreatePipelineOutputComponentConfig } from "./pipeline/pipeline-output";
+import { AddNewComponentToRAGAppConfig, UpsertComponentInputSource } from "./shared";
+import { CreateWindowBufferChatHistoryComponentConfig } from "./window-buffer-chat-history";
 
 export function GetAutoAgentConfig({
   projectId,

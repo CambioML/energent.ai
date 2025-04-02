@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChatAPI } from "@/lib/api/chat-api";
-import { useAgentStore } from "@/lib/store/useAgentStore";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, SkipBack, SkipForward, List, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { format } from "date-fns";
+import { useParams } from "react-router-dom";
+import { useAgentStore } from "@/lib/store/useAgentStore";
+import { useEffect, useState, useRef } from "react";
+import { Play, Pause, SkipBack, SkipForward, List, Camera } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { format } from "date-fns";
 
 interface VideoRecording {
   id: string;

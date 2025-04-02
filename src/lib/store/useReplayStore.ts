@@ -1,7 +1,5 @@
 import { create } from 'zustand';
-import { useChatStore } from './useChatStore';
-import { AgentAPI } from '../api/replay-api';
-import toast from 'react-hot-toast';
+import { AgentAPI } from '../api/agent-api';
 
 type ReplayState = {
   historyMode: boolean;
@@ -28,12 +26,8 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   setTaskName: (name) => set({ taskName: name }),
   setHistoryMode: (mode) => set({ historyMode: mode }),
   stopReplay: async () => {
-    const { replayId } = get();
-    await AgentAPI.stopReplay(replayId);
   },
   restartReplay: async () => {
-    const { replayId } = get();
-    await AgentAPI.restartReplay(replayId);
   },
   initializeReplay: async () => {
     await get().initializeProjectId();
