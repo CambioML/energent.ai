@@ -122,8 +122,8 @@ export const AgentAPI: AgentAPI = {
             const response = await axios.post(`${resourcesDomain}/ragapps`, agentConfig);
             console.log('Agent created:', response.data);
             
-            if (response.data && response.data.agent_id) {
-                return response.data.agent_id;
+            if (response.data && response.data.resource_id) {
+                return response.data.resource_id;
             } else {
                 throw new Error('Failed to create agent: No agent ID returned');
             }
