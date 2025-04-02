@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { BaseComponentConfig, ComponentOutputConfig } from "../../model";
+import { BaseComponentConfig, ComponentOutputConfig } from "../model";
 
 export type UserInputComponentConfig = {
   user_input_values: { [key: string]: any };

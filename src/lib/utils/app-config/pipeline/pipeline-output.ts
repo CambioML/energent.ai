@@ -1,5 +1,5 @@
 import {v4 as uuidv4} from 'uuid';
-import { BaseComponentConfig, ComponentOutputConfig } from '../../model';
+import { BaseComponentConfig, ComponentOutputConfig } from '../model';
 export type PipelineOutputComponentConfig = BaseComponentConfig;
 
 export function CreatePipelineOutputComponentConfig(

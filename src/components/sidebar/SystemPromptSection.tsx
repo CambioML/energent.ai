@@ -6,8 +6,7 @@ import { SystemPromptModal } from "./SystemPromptModal";
 import {
   Accordion,
   AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  AccordionItem
 } from "@/components/ui/accordion";
 
 export const SystemPromptSection = () => {

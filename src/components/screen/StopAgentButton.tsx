@@ -5,7 +5,7 @@ import { useAgentStore, AgentStatus } from '@/lib/store/useAgentStore';
 import { toast } from 'react-hot-toast';
 
 export default function StopAgentButton() {
-  const { status, stopAgent } = useAgentStore();
+  const { status } = useAgentStore();
   
   const isRunning = status === AgentStatus.Running;
   

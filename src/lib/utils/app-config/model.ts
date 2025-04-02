@@ -144,7 +144,7 @@ export type ConversationSummaryType = "summary" | "datetime";
 
 export type BaseComponentConfig = {
   id: string;
-  agent_id: string;
+  agent_id?: string;
   db_id?: string;
   type: string;
   description?: string;
