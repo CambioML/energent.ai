@@ -55,7 +55,6 @@ export function Messages() {
   useQuery({
     queryKey: ['fetchConversation', currentConversationId],
     queryFn: () => {
-      console.log('fetchConversation in Messages.tsx', currentConversationId);
       return fetchConversation(currentConversationId!);
     },
     enabled: !!currentConversationId && !!projectId && !!agentId
