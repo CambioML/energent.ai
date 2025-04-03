@@ -19,12 +19,14 @@ type AgentState = {
   isNewTaskModalOpen: boolean;
   isRecordingVideo: boolean;
   systemPrompt: string;
+  isSystemPromptLoading: boolean;
   setProjectId: (id: string) => void;
   setAgentId: (id: string) => void;
   setStatus: (status: AgentStatus) => void;
   setTaskName: (name: string) => void;
   setIsRecordingVideo: (isRecording: boolean) => void;
   setSystemPrompt: (prompt: string) => void;
+  setIsSystemPromptLoading: (isLoading: boolean) => void;
   stopAgent: () => Promise<void>;
   restartAgent: () => Promise<void>;
   openNewTaskModal: () => void;
@@ -45,12 +47,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   isNewTaskModalOpen: false,
   isRecordingVideo: false,
   systemPrompt: '',
+  isSystemPromptLoading: true,
   setStatus: (status) => set({ status }),
   setAgentId: (id) => set({ agentId: id }),
   setProjectId: (id) => set({ projectId: id }),
   setTaskName: (name) => set({ taskName: name }),
   setHistoryMode: (mode) => set({ historyMode: mode }),
   setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
+  setIsSystemPromptLoading: (isLoading) => set({ isSystemPromptLoading: isLoading }),
   setIsRecordingVideo: (isRecording) => set({ isRecordingVideo: isRecording }),
   stopAgent: async () => {
     const { agentId } = get();

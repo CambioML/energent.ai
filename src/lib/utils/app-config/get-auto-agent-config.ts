@@ -61,6 +61,7 @@ export function GetAutoAgentConfig({
   webSearchTavilyConfig,
   chatUploadFileConfig,
   useCaseTemplate,
+  systemPrompt,
 }: {
   projectId: string;
   appDBId: string;
@@ -105,6 +106,7 @@ export function GetAutoAgentConfig({
   webSearchTavilyConfig: WebSearchTavilyConfig;
   chatUploadFileConfig: ChatUploadFileConfig;
   useCaseTemplate: string;
+  systemPrompt: string;
 }): RAGAppConfig {
   let config: RAGAppConfig = {
     appDBId: appDBId,
@@ -211,7 +213,7 @@ export function GetAutoAgentConfig({
   );
 
   // Step 3. Auto Agent component
-  const autoAgentComp = createAutoAgentComponentConfig(projectId, appDBId, useCaseTemplate);
+  const autoAgentComp = createAutoAgentComponentConfig(projectId, appDBId, useCaseTemplate, systemPrompt);
   config = AddNewComponentToRAGAppConfig(
     config,
     autoAgentComp,
