@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { AgentAPI } from '@/lib/api/agent-api';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/lib/store/useChatStore';
-import RecordingIndicator from './RecordingIndicator';
 
 export default function Screen() {
   const { isGenerating } = useChatStore();
@@ -64,10 +63,6 @@ export default function Screen() {
           </div>
         ) : (
           <>
-            {/* Recording indicator overlay */}
-            <div className="absolute top-3 left-3 z-10">
-              <RecordingIndicator />
-            </div>
             {/* Computer iframe */}
             <div className="flex-1 relative">
               <iframe
