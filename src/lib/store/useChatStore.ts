@@ -33,7 +33,7 @@ interface ChatState {
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
   addMessage: (message: Message) => void;
-  updateMessage: (id: string, updates: Partial<Message>) => Promise<void>;
+  editMessage: (id: string, updates: Partial<Message>) => Promise<void>;
   
   // API Actions
   fetchConversations: () => Promise<void>;
@@ -62,7 +62,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   addMessage: (message) => set((state) => ({ 
     messages: [...state.messages, message] 
   })),
-  updateMessage: async (id, updates) => {
+  editMessage: async (id, updates) => {
     const { currentConversationId, messages, streamAndProcessResponse } = get();
     const { projectId, agentId } = useAgentStore.getState();
     
@@ -381,7 +381,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   
   sendFeedback: async (messageId, feedback) => {
-    const { currentConversationId, updateMessage } = get();
+    const { currentConversationId } = get();
     const { projectId, agentId } = useAgentStore.getState();
     
     if (!projectId || !agentId) {
@@ -396,10 +396,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     try {
       await ChatAPI.sendFeedback(currentConversationId, messageId, feedback, projectId, agentId);
-      updateMessage(messageId, { feedback });
+      
+      // Update the message state with feedback
+      set((state) => {
+        const updatedMessages = [...state.messages];
+        const messageIndex = updatedMessages.findIndex(msg => msg.id === messageId);
+        
+        if (messageIndex !== -1) {
+          updatedMessages[messageIndex] = {
+            ...updatedMessages[messageIndex],
+            feedback
+          };
+        }
+        
+        return { messages: updatedMessages };
+      });
     } catch (error) {
       console.error('Error sending feedback:', error);
       toast.error('Failed to send feedback');
+      throw error;
     }
   },
 })); 

@@ -33,7 +33,7 @@ export function MessageItem({ message, onFeedback }: MessageItemProps) {
   const [editedContent, setEditedContent] = useState(message.content);
   
   const { historyMode } = useAgentStore();
-  const { updateMessage } = useChatStore();
+  const { editMessage } = useChatStore();
 
   // Reset copy state after 2 seconds
   useEffect(() => {
@@ -66,7 +66,7 @@ export function MessageItem({ message, onFeedback }: MessageItemProps) {
     
     try {
       setIsSaving(true);
-      await updateMessage(message.id, { content: editedContent.trim() });
+      await editMessage(message.id, { content: editedContent.trim() });
       setIsEditing(false);
       toast.success("Message updated");
     } catch (error) {

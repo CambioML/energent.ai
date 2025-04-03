@@ -137,7 +137,6 @@ export const AgentAPI: AgentAPI = {
         try {
             // Get the list of resources for the project
             const response = await axios.get(`${resourcesDomain}/v2/projects/${projectId}/list`);
-            console.log('Response:', response.data);
             
             // Check if we have any ragapps
             if (response.data && 
