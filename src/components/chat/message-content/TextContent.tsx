@@ -12,7 +12,8 @@ export function TextContent({ content }: TextContentProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
           code({ node, inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");
             
