@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Settings } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,7 @@ export const SystemPromptModal = ({
   onClose,
 }: SystemPromptModalProps) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const { systemPrompt, setSystemPrompt } = useAgentStore();
+  const { systemPrompt, setSystemPrompt, isSystemPromptLoading } = useAgentStore();
 
   const handleSave = async () => {
     if (!systemPrompt.trim()) {
@@ -66,18 +67,24 @@ export const SystemPromptModal = ({
 
         <div className="py-4">
           <Textarea
-            placeholder="Enter your custom system prompt..."
+            placeholder={isSystemPromptLoading ? "Loading system prompt..." : "Enter your custom system prompt..."}
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
             className="min-h-[200px] font-mono text-sm"
+            disabled={isSystemPromptLoading}
           />
+          {isSystemPromptLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+              <Loading size="sm" />
+            </div>
+          )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
+          <Button variant="outline" onClick={onClose} disabled={isSaving || isSystemPromptLoading}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving || isSystemPromptLoading}>
             {isSaving ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>

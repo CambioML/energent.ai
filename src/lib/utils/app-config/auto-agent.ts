@@ -6,7 +6,7 @@ export interface AutoAgentComponentConfig extends BaseComponentConfig {
   agent_id: string,
   inputs: [
     { name: 'Template', data_type: DataTypes.STRING, default: string, required: boolean },
-    { name: 'System Message', data_type: DataTypes.STRING, required: boolean },
+    { name: 'System Message', data_type: DataTypes.STRING, default: string, required: boolean },
     { name: 'User Message', data_type: DataTypes.STRING, required: boolean },
   ],
   outputs: [
@@ -18,6 +18,7 @@ export function createAutoAgentComponentConfig(
   projectId: string,
   agentId: string,
   template: string,
+  systemMessage: string,
 ): AutoAgentComponentConfig {
   return {
     id: uuidv4(),
@@ -28,7 +29,7 @@ export function createAutoAgentComponentConfig(
     type: 'auto_agent',
     inputs: [
       { name: 'Template', data_type: DataTypes.STRING, default: template, required: true },
-      { name: 'System Message', data_type: DataTypes.STRING, required: false },
+      { name: 'System Message', data_type: DataTypes.STRING, default: systemMessage, required: false },
       { name: 'User Message', data_type: DataTypes.STRING, required: true },
     ],
     outputs: [

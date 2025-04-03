@@ -1,12 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { RAGAppConfig } from "./app-config/model";
 import { GetAutoAgentConfig } from "./app-config/get-auto-agent-config";
 import { DefaultEnableHyDE, DefaultChatbotRole, DefaultQueryRewriteLLM, DefaultHyDEPromptTemplate, DefaultChatboxPlaceholder, DefaultEnableFollowUpQuestions, DefaultFollowUpQuestionPrompt, DefaultFollowUpQuestionsLLM, DefaultHideEpsillaLogo, DefaultEnableReranker, DefaultOpenChatMessage, DefaultSampleQuestions, DefaultConversationSummaryType, DefaultAllowShare, DefaultTimeout, DefaultCollectFeedback, DefaultChatLLM, DefaultQueryRewritePromptTemplate, DefaultEnableQueryRewrite, DefaultChatHistoryChatWindowBufferConfig, DefaultPromptTemplate, DefaultRerankerConfig, DefaultHyDELLM, DefaultPrimaryColor, DefaultWebSearchTavilyConfig, DefaultChatUploadFileConfig } from "./app-config/contants";
 
 /**
  * Default configuration for creating a new agent
  */
-export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv4()) => ({
+export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv4(), systemPrompt: string = "") => ({
     parent_resource_id: projectId,
     name: "Linux Auto Agent",
     description: "Linux Auto Agent by Energent.AI",
@@ -44,6 +43,7 @@ export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv
       webSearchTavilyConfig: DefaultWebSearchTavilyConfig,
       chatUploadFileConfig: DefaultChatUploadFileConfig,
       useCaseTemplate: 'linux_claude_computer_use',
+      systemPrompt,
     }),
 });
 
@@ -54,29 +54,6 @@ export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv
  * @param newPrompt - The new system prompt to set
  * @returns The configuration object for updating the agent's system prompt
  */
-export const getUpdateSystemPromptConfig = (chatbotConfig: RAGAppConfig, newPrompt: string) => {
-  let updated = false;
-
-  // Update the system message in the auto agent component
-  if (chatbotConfig.components) {
-    const autoAgentComponent = chatbotConfig.components.find(
-      (component) => component.type === "auto_agent"
-    );
-    if (autoAgentComponent) {
-      const systemMessageInput = autoAgentComponent.inputs.find(
-        (input) => input.name === "System Message"
-      );
-      if (systemMessageInput) {
-        systemMessageInput.default = newPrompt;
-        updated = true;
-      }
-    }
-  }
-  if (!updated) {
-    console.log("No auto agent component found");
-    console.log(chatbotConfig);
-    throw new Error("No config found");
-  }
-  
-  return chatbotConfig;
+export const getUpdateSystemPromptConfig = (projectId: string, agentId: string, newPrompt: string) => {
+  return getDefaultAgentConfig(projectId, agentId, newPrompt);
 }; 

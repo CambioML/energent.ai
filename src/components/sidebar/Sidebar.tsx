@@ -21,7 +21,13 @@ export default function Sidebar() {
     handleButtonClick, 
     toggleSidebar
   } = useSidebarStore();
-  const { openNewTaskModal, setSystemPrompt, projectId, agentId } = useAgentStore();
+  const { 
+    agentId,
+    projectId,
+    openNewTaskModal, 
+    setSystemPrompt, 
+    setIsSystemPromptLoading,
+  } = useAgentStore();
 
   const location = useLocation();
 
@@ -30,6 +36,7 @@ export default function Sidebar() {
     queryKey: ['systemPrompt'],
     queryFn: async () => {
       try {
+        setIsSystemPromptLoading(true);
         const prompt = await AgentAPI.getSystemPrompt();
         setSystemPrompt(prompt);
         return prompt;
@@ -37,6 +44,8 @@ export default function Sidebar() {
         console.error("Failed to load system prompt:", error);
         toast.error("Failed to load system prompt");
         throw error;
+      } finally {
+        setIsSystemPromptLoading(false);
       }
     },
     enabled: Boolean(projectId && agentId)

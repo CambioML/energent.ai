@@ -189,14 +189,11 @@ export const AgentAPI: AgentAPI = {
                 throw new Error('Project ID or Agent ID not set');
             }
 
-            const currentConfig = await AgentAPI.getCurrentBotConfig();
-            
             // Get the configuration for updating the system prompt
-            const config = getUpdateSystemPromptConfig(currentConfig, systemPrompt);
+            const config = getUpdateSystemPromptConfig(projectId, agentId, systemPrompt);
             
             // Call the API to update the system prompt
             const response = await axios.put(`${resourcesDomain}/ragapps/${agentId}`, config);
-            console.log('System prompt updated:', response.data);
             
             return response.data;
         } catch (error) {
@@ -260,10 +257,27 @@ export const AgentAPI: AgentAPI = {
     getSystemPrompt: async () => {
         try {
             const currentConfig = await AgentAPI.getCurrentBotConfig();
-            return currentConfig.chatbotUIConfig.chatbotRole;
+            
+            // Look for the system message in the auto agent component
+            if (currentConfig.components) {
+                const autoAgentComponent = currentConfig.components.find(
+                    (component) => component.type === "auto_agent"
+                );
+                if (autoAgentComponent) {
+                    const systemMessageInput = autoAgentComponent.inputs.find(
+                        (input) => input.name === "System Message"
+                    );
+                    if (systemMessageInput) {
+                        return systemMessageInput.default || "";
+                    }
+                }
+            }
+            
+            console.log("No auto agent component found");
+            return "";
         } catch (error) {
             console.error('Failed to get system prompt:', error);
-            throw error;
+            return "";
         }
     }
 }
