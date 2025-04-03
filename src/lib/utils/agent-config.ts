@@ -30,7 +30,7 @@ export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv
       botOpeningMessage: DefaultOpenChatMessage,
       sampleQuestions: DefaultSampleQuestions,
       appDescription: "Linux Auto Agent by Energent.AI",
-      logo: "",
+      logo: "https://app.energent.ai/favicon/web-app-manifest-512x512.png",
       chatboxPlaceholder: DefaultChatboxPlaceholder,
       enableFollowUpQuestions: DefaultEnableFollowUpQuestions,
       followUpQuestionsPrompt: DefaultFollowUpQuestionPrompt,
@@ -55,10 +55,27 @@ export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv
  * @returns The configuration object for updating the agent's system prompt
  */
 export const getUpdateSystemPromptConfig = (chatbotConfig: RAGAppConfig, newPrompt: string) => {
-  // Start with the default config
-  // Update the chatbotRole with the new prompt
-  if (chatbotConfig.chatbotUIConfig) {
-    chatbotConfig.chatbotUIConfig.chatbotRole = newPrompt;
+  let updated = false;
+
+  // Update the system message in the auto agent component
+  if (chatbotConfig.components) {
+    const autoAgentComponent = chatbotConfig.components.find(
+      (component) => component.type === "auto_agent"
+    );
+    if (autoAgentComponent) {
+      const systemMessageInput = autoAgentComponent.inputs.find(
+        (input) => input.name === "System Message"
+      );
+      if (systemMessageInput) {
+        systemMessageInput.default = newPrompt;
+        updated = true;
+      }
+    }
+  }
+  if (!updated) {
+    console.log("No auto agent component found");
+    console.log(chatbotConfig);
+    throw new Error("No config found");
   }
   
   return chatbotConfig;
