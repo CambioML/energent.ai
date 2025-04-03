@@ -56,7 +56,7 @@ export function TextContent({ content }: TextContentProps) {
                 href={href} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-primary underline hover:text-primary/90"
+                className="text-blue-500 underline hover:text-blue-600"
               >
                 {children}
               </a>
