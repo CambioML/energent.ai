@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AgentAPI } from '@/lib/api/agent-api';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/lib/store/useChatStore';
+import { VncScreen } from 'react-vnc';
 
 export default function Screen() {
   const { isGenerating } = useChatStore();
@@ -63,13 +64,23 @@ export default function Screen() {
           </div>
         ) : (
           <>
-            {/* Computer iframe */}
-            <div className="flex-1 relative">
-              <iframe
-                src={`https://agent-${agentId}.docseek.chat`}
-                className="w-full h-full border-none"
-                title="Computer Screen"
-              ></iframe>
+            {/* VNC connection */}
+            <div className="flex-1 relative overflow-hidden">
+              <VncScreen
+                url={`wss://agent-${agentId}.docseek.chat/websockify`}
+                scaleViewport
+                resizeSession={false}
+                clipViewport
+                dragViewport
+                className="w-full h-full"
+                style={{
+                  background: 'transparent',
+                }}
+                autoConnect
+                viewOnly={false}
+                onConnect={() => console.log('VNC Connected')}
+                onDisconnect={() => console.log('VNC Disconnected')}
+              />
             </div>
           </>
         )}
