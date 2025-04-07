@@ -160,7 +160,7 @@ export const AgentAPI: AgentAPI = {
 
     stopAgent: async (projectId: string, agentId: string, messageId: string) => {
         try {
-            const response = await axios.put(`${Endpoint.chatbotApp}/agent/${projectId}/${agentId}/${messageId}/stop`);
+            const response = await axios.post(`${Endpoint.chatbotApp}/agent/${projectId}/${agentId}/${messageId}/stop`, {});
             console.log('Agent stopped:', response.data);
             return response.data;
         } catch (error) {
