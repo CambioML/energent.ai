@@ -1,17 +1,24 @@
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import { StopCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useChatStore } from '@/lib/store/useChatStore';
 import { useAgentStore, AgentStatus } from '@/lib/store/useAgentStore';
-import { toast } from 'react-hot-toast';
 
 export default function StopAgentButton() {
-  const { status } = useAgentStore();
+  const { getLastMessageId } = useChatStore();
+  const { status, stopAgent } = useAgentStore();
   
   const isRunning = status === AgentStatus.Running;
   
   const handleClick = async () => {
-      // await stopAgent();
-      toast("Not implemented yet!");
+    const messageId = await getLastMessageId();
+    if (!messageId) {
+      toast.error("No message ID found");
+      return;
+    }
+    await stopAgent(messageId);
+    toast.success("Agent stopped successfully!");
   };
 
   if (!isRunning) {

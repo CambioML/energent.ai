@@ -13,7 +13,7 @@ interface AgentAPI {
     getProjectId: () => Promise<string>;
     createAgent: (projectId: string) => Promise<string>;
     getAgentId: (projectId: string) => Promise<string | null>;
-    stopAgent: (agentId: string) => Promise<void>;
+    stopAgent: (projectId: string, agentId: string, messageId: string) => Promise<void>;
     restartAgent: (agentId: string) => Promise<void>;
     updateSystemPrompt: (systemPrompt: string) => Promise<void>;
     startVideoRecording: (agentId: string, conversationId: string) => Promise<{success: boolean}>;
@@ -158,9 +158,9 @@ export const AgentAPI: AgentAPI = {
         }
     },
 
-    stopAgent: async (agentId: string) => {
+    stopAgent: async (projectId: string, agentId: string, messageId: string) => {
         try {
-            const response = await axios.put(`${Endpoint.agent}/${agentId}/stop`);
+            const response = await axios.put(`${Endpoint.chatbotApp}/agent/${projectId}/${agentId}/${messageId}/stop`);
             console.log('Agent stopped:', response.data);
             return response.data;
         } catch (error) {

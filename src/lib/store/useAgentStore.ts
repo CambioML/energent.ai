@@ -27,7 +27,7 @@ type AgentState = {
   setIsRecordingVideo: (isRecording: boolean) => void;
   setSystemPrompt: (prompt: string) => void;
   setIsSystemPromptLoading: (isLoading: boolean) => void;
-  stopAgent: () => Promise<void>;
+  stopAgent: (messageId: string) => Promise<void>;
   restartAgent: () => Promise<void>;
   openNewTaskModal: () => void;
   closeNewTaskModal: () => void;
@@ -56,9 +56,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
   setIsSystemPromptLoading: (isLoading) => set({ isSystemPromptLoading: isLoading }),
   setIsRecordingVideo: (isRecording) => set({ isRecordingVideo: isRecording }),
-  stopAgent: async () => {
-    const { agentId } = get();
-    await AgentAPI.stopAgent(agentId);
+  stopAgent: async (messageId: string) => {
+    const { projectId, agentId } = get();
+    if (!projectId || !agentId) {
+      throw new Error('Project ID or agent ID not set. Please initialize project ID and agent ID first.');
+    }
+    await AgentAPI.stopAgent(projectId, agentId, messageId);
     set({ status: AgentStatus.Ready });
   },
   restartAgent: async () => {
