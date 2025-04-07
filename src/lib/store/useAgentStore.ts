@@ -11,14 +11,14 @@ export enum AgentStatus {
 }
 
 type AgentState = {
-  historyMode: boolean;
   projectId: string;
   agentId: string;
+  systemPrompt: string;
+  historyMode: boolean;
   status: AgentStatus;
   taskName: string;
-  isNewTaskModalOpen: boolean;
   isRecordingVideo: boolean;
-  systemPrompt: string;
+  isNewTaskModalOpen: boolean;
   isSystemPromptLoading: boolean;
   setProjectId: (id: string) => void;
   setAgentId: (id: string) => void;
@@ -39,14 +39,14 @@ type AgentState = {
 };
 
 export const useAgentStore = create<AgentState>((set, get) => ({
-  historyMode: false,
   projectId: '',
   agentId: '',
+  systemPrompt: '',
+  historyMode: false,
   status: AgentStatus.Starting,
   taskName: "Task Name 1",
-  isNewTaskModalOpen: false,
   isRecordingVideo: false,
-  systemPrompt: '',
+  isNewTaskModalOpen: false,
   isSystemPromptLoading: true,
   setStatus: (status) => set({ status }),
   setAgentId: (id) => set({ agentId: id }),
@@ -61,8 +61,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (!projectId || !agentId) {
       throw new Error('Project ID or agent ID not set. Please initialize project ID and agent ID first.');
     }
+
     await AgentAPI.stopAgent(projectId, agentId, messageId);
-    set({ status: AgentStatus.Ready });
+
+    // A delay to ensure the agent has time to stop before setting the status to ready
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    set({
+      status: AgentStatus.Ready,
+      isRecordingVideo: false
+    });
   },
   restartAgent: async () => {
     const { agentId } = get();
