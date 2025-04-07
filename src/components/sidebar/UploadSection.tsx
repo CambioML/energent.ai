@@ -165,40 +165,38 @@ export const UploadSection = () => {
           </AccordionTrigger>
         </div>
         <AccordionContent>
-          {files.length === 0 && (
-            <div className="flex flex-col gap-4 p-4">
-              <div
-                {...getRootProps()}
+          <div className="flex flex-col gap-4 p-4">
+            <div
+              {...getRootProps()}
+              className={cn(
+                "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg w-full transition-colors duration-200 cursor-pointer",
+                isDragActive && "border-primary bg-primary/5",
+                isDragAccept && "border-green-500 bg-green-500/5",
+                isDragReject && "border-red-500 bg-red-500/5"
+              )}
+            >
+              <input {...getInputProps()} />
+              <Upload
+                size={22}
                 className={cn(
-                  "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg w-full transition-colors duration-200 cursor-pointer",
-                  isDragActive && "border-primary bg-primary/5",
-                  isDragAccept && "border-green-500 bg-green-500/5",
-                  isDragReject && "border-red-500 bg-red-500/5"
+                  "mb-2",
+                  isDragActive ? "text-primary animate-bounce" : "text-primary"
                 )}
-              >
-                <input {...getInputProps()} />
-                <Upload
-                  size={22}
-                  className={cn(
-                    "mb-2",
-                    isDragActive ? "text-primary animate-bounce" : "text-primary"
-                  )}
-                />
-                <p className="text-sm text-center mb-2">
-                  {isDragActive
-                    ? "Drop files here..."
-                    : "Drag & drop files here or click to browse"}
-                </p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG (max 10MB)
-                </p>
-                <Button className="gap-2">
-                  <Plus size={16} />
-                  Select Files
-                </Button>
-              </div>
+              />
+              <p className="text-sm text-center mb-2">
+                {isDragActive
+                  ? "Drop files here..."
+                  : "Drag & drop files here or click to browse"}
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG (max 10MB)
+              </p>
+              <Button className="gap-2">
+                <Plus size={16} />
+                Select Files
+              </Button>
             </div>
-          )}
+          </div>
 
           {files.length > 0 && (
             <div className="p-4">
