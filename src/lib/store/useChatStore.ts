@@ -3,6 +3,8 @@ import { ChatAPI } from '../api/chat-api';
 import { AgentStatus, useAgentStore } from './useAgentStore';
 import toast from 'react-hot-toast';
 
+const UPDATED_MESSAGE_ID = 'UPDATED_MESSAGE_ID';
+
 export interface Message {
   id: string;
   content: string;
@@ -10,7 +12,7 @@ export interface Message {
   isPartial?: boolean;
   timestamp: number;
   conversationId: string;
-  references?: any[];
+  references?: unknown[];
   feedback?: 'good' | 'bad';
 }
 
@@ -20,31 +22,48 @@ export interface Conversation {
   timestamp: number;
 }
 
+// API response interfaces
+export interface ConversationResponse {
+  ConversationId: string;
+  Summary: string;
+  CreatedAt: number;
+}
+
+export interface MessageResponse {
+  MessageId: string;
+  Content: string;
+  Role: string;
+  Timestamp: number;
+  References?: unknown[];
+}
+
 interface ChatState {
   // State
   conversations: Conversation[];
   currentConversationId: string | null;
   messages: Message[];
   isTyping: boolean;
-  messagesLoaded: boolean;
   isGenerating: boolean;
+  messagesLoaded: boolean;
 
   // Actions
   setConversations: (conversations: Conversation[]) => void;
   setCurrentConversationId: (id: string | null) => void;
   addMessage: (message: Message) => void;
-  editMessage: (id: string, updates: Partial<Message>) => Promise<void>;
+  editMessage: (id: string, content: string) => Promise<void>;
   
   // API Actions
   fetchConversations: () => Promise<void>;
   fetchConversation: (conversationId: string) => Promise<boolean>;
+  fetchConversationWithoutUpdate: (conversationId: string) => Promise<Message[]>;
   createConversation: (summary?: string, projectId?: string, agentId?: string) => Promise<string>;
   deleteConversation: (conversationId: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   sendFeedback: (messageId: string, feedback: 'good' | 'bad') => Promise<void>;
   
-  // Helper function to stream and process AI responses
+  // Helper function
   streamAndProcessResponse: (messageId: string, conversationId: string, projectId: string, agentId: string) => Promise<boolean>;
+  getUpdatedMessageIdAndMessages: () => Promise<[string, Message[]]>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -62,13 +81,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   addMessage: (message) => set((state) => ({ 
     messages: [...state.messages, message] 
   })),
-  editMessage: async (id, updates) => {
-    const { currentConversationId, messages, streamAndProcessResponse } = get();
+  editMessage: async (id, content) => {
+    let messages = get().messages;
+
     const { projectId, agentId } = useAgentStore.getState();
+    const { currentConversationId, streamAndProcessResponse, getUpdatedMessageIdAndMessages } = get();
     
     if (!currentConversationId || !projectId || !agentId) {
       toast.error('Missing required information');
       return;
+    }
+    
+    if (id === UPDATED_MESSAGE_ID) {
+      [id, messages] = await getUpdatedMessageIdAndMessages();
     }
     
     try {
@@ -93,12 +118,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       
       // Send the updated message content
-      if (updates.content) {
+      if (content) {
         // Create updated message with new ID
         const updatedMessage: Message = {
           ...messageToUpdate,
-          ...updates,
-          id: Date.now().toString(), // New ID for the updated message
+          content,
+          id: UPDATED_MESSAGE_ID, // New ID for the updated message
           timestamp: Date.now()
         };
         
@@ -107,8 +132,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
           messages: [...state.messages, updatedMessage] 
         }));
 
-        set({ isTyping: true })
-        
         // Send the message to get a new AI response
         const response = await ChatAPI.sendMessage(
           currentConversationId, 
@@ -120,7 +143,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         const messageId = response.result;
         
         // Process streaming response
-        await streamAndProcessResponse(messageId, currentConversationId, projectId, agentId);
+        streamAndProcessResponse(messageId, currentConversationId, projectId, agentId);
+        set({ isTyping: true })
       }
     } catch (error) {
       console.error('Error updating message:', error);
@@ -137,10 +161,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       console.log('Fetching conversations for projectId:', projectId, 'and agentId:', agentId);
       const data = await ChatAPI.getConversations(projectId, agentId);
-      const conversations = data.result.map((conv: any) => ({
-        id: conv.conversationId || conv.ConversationId,
-        summary: conv.summary || conv.Summary || 'Unnamed Conversation',
-        timestamp: conv.timestamp || conv.CreatedAt || Date.now(),
+      const conversations = data.result.map((conv: ConversationResponse) => ({
+        id: conv.ConversationId,
+        summary: conv.Summary || 'Unnamed Conversation',
+        timestamp: conv.CreatedAt || Date.now(),
       }));
       
       setConversations(conversations);
@@ -174,7 +198,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     try {
       const data = await ChatAPI.getConversation(conversationId, projectId, agentId);
-      const messages = data.result.history.map((msg: any) => ({
+      const messages = data.result.history.map((msg: MessageResponse) => ({
         id: msg.MessageId,
         content: msg.Content,
         isBot: msg.Role === 'AI',
@@ -188,6 +212,33 @@ export const useChatStore = create<ChatState>((set, get) => ({
       console.error('Error fetching conversation:', error);
       toast.error('Failed to load conversation history');
       return false;
+    }
+  },
+
+  fetchConversationWithoutUpdate: async (conversationId) => {
+    const { projectId, agentId } = useAgentStore.getState();
+    
+    if (!projectId || !agentId) {
+      toast.error('Project ID or Agent ID not set');
+      console.error('from fetchConversation', projectId, agentId);
+      throw new Error('Project ID or Agent ID not set');
+    }
+    
+    try {
+      const data = await ChatAPI.getConversation(conversationId, projectId, agentId);
+      const messages = data.result.history.map((msg: MessageResponse) => ({
+        id: msg.MessageId,
+        content: msg.Content,
+        isBot: msg.Role === 'AI',
+        timestamp: msg.Timestamp,
+        conversationId,
+        references: msg.References || [],
+      }));
+      return messages;
+    } catch (error) {
+      console.error('Error fetching conversation:', error);
+      toast.error('Failed to load conversation history');
+      return [];
     }
   },
   
@@ -417,4 +468,39 @@ export const useChatStore = create<ChatState>((set, get) => ({
       throw error;
     }
   },
+
+  getUpdatedMessageIdAndMessages: async () => {
+    const { messages, currentConversationId } = get();
+
+    // First, find the message with our placeholder ID
+    let message = messages.find(msg => msg.id === UPDATED_MESSAGE_ID) as Message;
+    const content = message.content;
+    
+    // Now get the updated messages after the fetch has completed
+    const newMessages = await get().fetchConversationWithoutUpdate(currentConversationId as string);
+    
+    // Find the message with matching content to get its real ID
+    message = newMessages.find(msg => msg.content === content) as Message;
+
+    // Retry up to 2 times with 2 second delay if message not found
+    let retryCount = 0;
+    const maxRetries = 2;
+    while (!message && retryCount < maxRetries) {
+      // Wait for 2 seconds before retrying
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Fetch messages again
+      const retryMessages = await get().fetchConversationWithoutUpdate(currentConversationId as string);
+      
+      // Try to find the message again
+      message = retryMessages.find(msg => msg.content === content) as Message;
+      retryCount++;
+    }
+
+    if (!message) {
+      throw new Error('Message not found after retries');
+    }
+
+    return [message.id, newMessages];
+  } 
 })); 
