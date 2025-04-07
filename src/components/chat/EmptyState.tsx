@@ -158,7 +158,7 @@ export default function EmptyState({ onExampleClick }: EmptyStateProps) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 whileHover={{ scale: 1.02 }}
                 className="p-2 rounded-lg border border-border/40 bg-card/30 hover:bg-accent cursor-pointer flex items-center gap-2"
-                onClick={() => onExampleClick(task.title)}
+                onClick={() => onExampleClick(task.description)}
               >
                 <div className="p-1 rounded-lg bg-primary/10">
                   <Icon className="h-4 w-4 text-primary" />
