@@ -61,7 +61,8 @@ interface ChatState {
   sendMessage: (content: string) => Promise<void>;
   sendFeedback: (messageId: string, feedback: 'good' | 'bad') => Promise<void>;
   
-  // Helper function
+  // Helper functions
+  getLastMessageId: () => Promise<string | null>;
   streamAndProcessResponse: (messageId: string, conversationId: string, projectId: string, agentId: string) => Promise<boolean>;
   getUpdatedMessageIdAndMessages: () => Promise<[string, Message[]]>;
 }
@@ -467,6 +468,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       toast.error('Failed to send feedback');
       throw error;
     }
+  },
+
+  getLastMessageId: async () => {
+    const { messages } = get();
+    return messages[messages.length - 1]?.id || null;
   },
 
   getUpdatedMessageIdAndMessages: async () => {
