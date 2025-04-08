@@ -37,6 +37,8 @@ export default function Agent() {
           {/* Left side: Screen - Only show if there are messages */}
           {messagesLoaded && messages.length > 0 && (
             <ResizablePanel
+              id="screen-panel"
+              order={1}
               defaultSize={65} // Set larger default size for left panel
               minSize={40} // Set appropriate min size
               maxSize={80} // Set appropriate max size
@@ -67,10 +69,12 @@ export default function Agent() {
 
           {/* Right side: Chat with handle on left side */}
           {messagesLoaded && messages.length > 0 && (
-            <ResizableHandle withHandle />
+            <ResizableHandle id="resize-handle" withHandle />
           )}
 
           <ResizablePanel
+            id="chat-panel"
+            order={2}
             defaultSize={messages.length > 0 ? 35 : 100}
             minSize={20}
             maxSize={60}
