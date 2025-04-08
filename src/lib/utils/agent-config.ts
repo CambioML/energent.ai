@@ -42,7 +42,7 @@ export const getDefaultAgentConfig = (projectId: string, agentId: string = uuidv
       primaryColor: DefaultPrimaryColor,
       webSearchTavilyConfig: DefaultWebSearchTavilyConfig,
       chatUploadFileConfig: DefaultChatUploadFileConfig,
-      useCaseTemplate: 'linux_claude_computer_use',
+      useCaseTemplate: 'linux_claude_all_tools_computer_use',
       systemPrompt,
     }),
 });
