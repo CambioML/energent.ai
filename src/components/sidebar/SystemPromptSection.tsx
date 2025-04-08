@@ -36,7 +36,7 @@ export const SystemPromptSection = () => {
             className="flex items-center gap-3 p-4 border-b cursor-pointer hover:bg-accent/50 transition-colors"
             onClick={handleSectionClick}
           >
-            <Settings size={20} className="text-primary shrink-0" />
+            <Settings size={20} className="shrink-0" />
             <div className="flex-1 flex justify-start items-center p-0">
               <h3 className="text-lg font-medium">System Prompt</h3>
             </div>

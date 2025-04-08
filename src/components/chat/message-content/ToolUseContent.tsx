@@ -24,9 +24,9 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
   const getActionIcon = () => {
     switch (action) {
       case "screenshot":
-        return <Camera size={16} className="text-primary" />;
+        return <Camera size={16} className="" />;
       case "key":
-        return <Keyboard size={16} className="text-primary" />;
+        return <Keyboard size={16} className="" />;
       case "type":
         return <Type size={16} className="text-purple-500" />;
       case "left_click":
@@ -42,7 +42,7 @@ export function ToolUseContent({ name, input }: ToolUseContentProps) {
       case "mouse_move":
         return <MousePointer size={16} className="text-indigo-500" />;
       case "execute":
-        return <Command size={16} className="text-primary" />;
+        return <Command size={16} className="" />;
       default:
         return <Terminal size={16} className="text-muted-foreground" />;
     }
