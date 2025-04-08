@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Send } from 'lucide-react';
 import { useChatStore } from '@/lib/store/useChatStore';

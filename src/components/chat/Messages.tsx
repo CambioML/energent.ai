@@ -1,6 +1,6 @@
 import { MessageItem } from "./MessageItem";
 import { useQuery } from "@tanstack/react-query";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useChatStore } from "@/lib/store/useChatStore";
 import { LoadingDots } from "@/components/ui/loading-dots";

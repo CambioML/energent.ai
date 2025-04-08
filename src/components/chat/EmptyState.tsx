@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MessageSquare, BookOpen, TestTube2, Brain, Laptop, Zap, Coffee, Send, Cat, Dog, Rabbit, Bug, Users, Database, Video } from "lucide-react";
+import { Zap, Send, Users, Database, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useChatStore } from "@/lib/store/useChatStore";
