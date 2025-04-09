@@ -1,0 +1,48 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 52.14.32.213 >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh ubuntu@52.14.32.213 'mkdir -p ~/energent-deploy'
+          scp -r dist/* ubuntu@52.14.32.213:~/energent-deploy/
+          ssh ubuntu@52.14.32.213 '
+            cd ~/energent.ai && 
+            git pull &&
+            bun i &&
+            bun run build &&
+            sudo rm -rf /var/www/* &&
+            sudo cp -r dist/* /var/www/ &&
+            sudo chown -R caddy:caddy /var/www
+          ' 
