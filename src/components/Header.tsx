@@ -43,7 +43,7 @@ export default function Header() {
   };
 
   return (
-    <div className={`${isWorkspacePage ? 'static' : 'sticky'} top-0 z-20 w-full flex justify-between items-center p-5 ${isWorkspacePage ? 'bg-background border-b' : ''}`}>
+    <div className={`sticky shadow-xs top-0 z-20 w-full flex justify-between items-center p-5 bg-background border-b`}>
       {/* Blur effect layers - only shown on non-agent pages */}
       {!isWorkspacePage && (
         <>
@@ -62,7 +62,7 @@ export default function Header() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="z-[10]"
+        className="z-[10] pl-2"
       >
         <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
           <span className="font-semibold text-xl">Energent.ai</span>

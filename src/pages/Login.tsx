@@ -252,7 +252,7 @@ export default function Login() {
                     
                     <div className="relative my-6">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
+                        <span className="w-full" />
                       </div>
                     </div>
                     <div className="mt-8 flex justify-center gap-6">

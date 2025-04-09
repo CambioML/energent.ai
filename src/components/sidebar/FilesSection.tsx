@@ -24,7 +24,7 @@ export const FilesSection = () => {
     >
       <AccordionItem value="files" className="border-0">
         <div className="flex items-center gap-3 p-4 border-b">
-          <Files size={20} className="text-primary shrink-0" />
+          <Files size={20} className="shrink-0" />
           <AccordionTrigger className="flex-1 flex justify-center items-center p-0 hover:no-underline">
             <h3 className="text-lg font-medium">Files Uploaded</h3>
           </AccordionTrigger>

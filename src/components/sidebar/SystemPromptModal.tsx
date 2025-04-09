@@ -56,7 +56,7 @@ export const SystemPromptModal = ({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Settings size={18} className="text-primary" />
+            <Settings size={18} className="" />
             System Prompt Customization
           </DialogTitle>
           <DialogDescription>

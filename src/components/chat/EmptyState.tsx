@@ -80,6 +80,15 @@ export default function EmptyState({ onExampleClick }: EmptyStateProps) {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 h-full flex flex-col items-center">
+      {/* Colorful backdrop elements - expanded to 80% of screen */}
+      <div className="absolute inset-x-0 top-0 w-[60%] mx-auto h-[80vh] [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:hidden pointer-events-none"></div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        transition={{ duration: 1.2 }}
+        className="absolute inset-x-0 top-[30%] mx-auto h-[60vh] w-[80%] rounded-[50%] bg-blue-300/30 dark:bg-blue-500/30 blur-[150px] pointer-events-none"
+      ></motion.div>
+      
       <div className="flex-1 flex items-center justify-center w-full max-w-4xl">
         <motion.div
           key="empty-state"
@@ -89,38 +98,38 @@ export default function EmptyState({ onExampleClick }: EmptyStateProps) {
           transition={{ duration: 0.5 }}
           className="text-center w-full"
         >
-          <h2 className="text-4xl font-semibold mb-2 text-foreground">Welcome to Energent AI</h2>
-          <h3 className="text-2xl text-muted-foreground mb-8">How can I help you today?</h3>
+          <h2 className="text-5xl mb-2 text-foreground">Welcome to <span className="inline-block font-bold text-blue-500">Energent.AI</span></h2>
+          <h3 className="text-xl text-muted-foreground/70 mb-10">How can I help you today?</h3>
 
           {/* Large Input Box */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0, scale: 1.05 }}
             transition={{ delay: 0.2 }}
-            className="mb-12 px-4 mx-auto w-full max-w-3xl"
+            className="mb-12 px-4 mx-auto w-full max-w-3xl relative"
           >
             <form onSubmit={handleSubmit} className="relative group">
               <input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Write a task to Energent AI..."
-                className="w-full px-8 py-7 text-xl rounded-2xl bg-muted/50 focus:bg-muted/80 border-2 border-border/50 focus:border-primary outline-none text-foreground/70 focus:text-foreground placeholder:text-muted-foreground/50 transition-all duration-300 shadow-xl hover:shadow-2xl"
+                className="w-full px-8 py-6 text-lg rounded-xl bg-white/80 dark:bg-background/60 backdrop-blur-md border border-white/50 dark:border-blue-500/20 hover:border-blue-200 dark:hover:border-blue-500/30 focus:border-blue-400 dark:focus:border-blue-400/70 outline-none text-foreground/90 focus:text-foreground transition-all duration-300 shadow-md hover:shadow-blue-200/10"
                 autoFocus
               />
               <button 
                 type="submit" 
                 // disabled={!inputValue.trim()}
                 aria-label="Send message"
-                className="absolute right-6 top-1/2 -translate-y-1/2 p-3 rounded-xl bg-primary text-primary-foreground opacity-80 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-200"
+                className="absolute right-5 top-1/2 -translate-y-1/2 p-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
               >
-                <Send className="h-6 w-6" />
+                <Send className="h-5 w-5" />
               </button>
             </form>
           </motion.div>
         </motion.div>
       </div>
 
-      <div className="w-full max-w-5xl mt-auto opacity-60 hover:opacity-90 transition-opacity duration-300">
+      <div className="w-full max-w-5xl mt-auto opacity-80 hover:opacity-100 transition-opacity duration-300">
         <p className="text-center text-muted-foreground/80 text-sm mb-4">Try one of these examples:</p>
         
         {/* Categories */}
@@ -157,7 +166,7 @@ export default function EmptyState({ onExampleClick }: EmptyStateProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 whileHover={{ scale: 1.02 }}
-                className="p-2 rounded-lg border border-border/40 bg-card/30 hover:bg-accent cursor-pointer flex items-center gap-2"
+                className="p-2 rounded-lg border bg-card/30 hover:bg-accent cursor-pointer flex items-center gap-2"
                 onClick={() => onExampleClick(task.description)}
               >
                 <div className="p-1 rounded-lg bg-primary/10">

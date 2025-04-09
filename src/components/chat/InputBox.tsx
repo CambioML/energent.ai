@@ -47,7 +47,7 @@ export default function InputBox() {
   };
 
   return (
-    <div className="border-t border-border/50 py-3 px-4 bg-background/80 backdrop-blur-sm">
+    <div className="py-3 px-4 bg-background/80 backdrop-blur-sm">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           value={inputValue}

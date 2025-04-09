@@ -159,7 +159,7 @@ export const UploadSection = () => {
     >
       <AccordionItem value="upload" className="border-0">
         <div className="flex items-center gap-3 p-4 border-b">
-          <Upload size={20} className="text-primary shrink-0" />
+          <Upload size={20} className="shrink-0" />
           <AccordionTrigger className="flex-1 flex justify-center items-center p-0 hover:no-underline">
             <h3 className="text-lg font-medium">File Upload</h3>
           </AccordionTrigger>
@@ -169,7 +169,7 @@ export const UploadSection = () => {
             <div
               {...getRootProps()}
               className={cn(
-                "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg w-full transition-colors duration-200 cursor-pointer",
+                "flex flex-col items-center justify-center p-4 border-1 border-dashed border-primary/60 rounded-lg w-full transition-colors duration-200 cursor-pointer",
                 isDragActive && "border-primary bg-primary/5",
                 isDragAccept && "border-green-500 bg-green-500/5",
                 isDragReject && "border-red-500 bg-red-500/5"
@@ -238,7 +238,7 @@ export const UploadSection = () => {
                               className="h-8 w-8 rounded object-cover"
                             />
                           ) : isValid ? (
-                            <FileText size={20} className="text-primary" />
+                            <FileText size={20} className="" />
                           ) : (
                             <FileWarning size={20} className="text-red-500" />
                           )}

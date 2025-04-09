@@ -1,7 +1,88 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Font declarations */
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-ExtraLight.woff2') format('woff2'),
+       url('/fonts/Assistant-ExtraLight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Light.woff2') format('woff2'),
+       url('/fonts/Assistant-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Regular.woff2') format('woff2'),
+       url('/fonts/Assistant-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Medium.woff2') format('woff2'),
+       url('/fonts/Assistant-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-SemiBold.woff2') format('woff2'),
+       url('/fonts/Assistant-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Bold.woff2') format('woff2'),
+       url('/fonts/Assistant-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-ExtraBold.woff2') format('woff2'),
+       url('/fonts/Assistant-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arcadia Text Variable';
+  src: url('/fonts/ArcadiaTextVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arcadia Display Variable';
+  src: url('/fonts/ArcadiaDisplayVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --font-assistant: 'Assistant', sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -15,7 +96,7 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: rgba(225, 235, 245, 0.8);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -75,6 +156,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-assistant: var(--font-assistant);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -114,12 +198,21 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-none outline-ring/50;
+    letter-spacing: 0.02em;
     overscroll-behavior-y: contain;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-assistant);
   }
+}
+
+@utility bg-card {
+    background-color: #f0f0f0;
 }
 
 @utility t-workspace {
@@ -129,4 +222,44 @@
 @utility h-workspace {
     min-height: calc(100vh - 77px);
     max-height: calc(100vh - 77px);
+}
+
+/* Font utilities */
+@utility font-assistant {
+  font-family: var(--font-assistant);
+}
+
+@utility font-assistant-extralight {
+  font-family: var(--font-assistant);
+  font-weight: 200;
+}
+
+@utility font-assistant-light {
+  font-family: var(--font-assistant);
+  font-weight: 300;
+}
+
+@utility font-assistant-regular {
+  font-family: var(--font-assistant);
+  font-weight: 400;
+}
+
+@utility font-assistant-medium {
+  font-family: var(--font-assistant);
+  font-weight: 500;
+}
+
+@utility font-assistant-semibold {
+  font-family: var(--font-assistant);
+  font-weight: 600;
+}
+
+@utility font-assistant-bold {
+  font-family: var(--font-assistant);
+  font-weight: 700;
+}
+
+@utility font-assistant-extrabold {
+  font-family: var(--font-assistant);
+  font-weight: 800;
 }

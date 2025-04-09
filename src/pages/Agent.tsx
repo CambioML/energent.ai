@@ -46,14 +46,13 @@ export default function Agent() {
             >
               <div className="flex flex-col w-full h-full gap-3">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 1.0 }}
-                      className="flex items-center gap-2"
                     >
-                      <h2 className="text-lg font-medium">
+                      <h2 className="text-xl">
                         Energent.ai's virtual computer
                       </h2>
                     </motion.div>
