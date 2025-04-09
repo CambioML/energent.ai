@@ -87,7 +87,6 @@ export default function Header() {
               variant="ghost" 
               size="icon" 
               onClick={logout}
-              className="text-primary hover:text-primary transition-colors"
               aria-label="Logout"
             >
               <LogOut className="h-[1.2rem] w-[1.2rem]" />

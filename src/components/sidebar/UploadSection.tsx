@@ -180,7 +180,7 @@ export const UploadSection = () => {
                 size={22}
                 className={cn(
                   "mb-2",
-                  isDragActive ? "text-primary animate-bounce" : "text-primary"
+                  isDragActive && "animate-bounce"
                 )}
               />
               <p className="text-sm text-center mb-2">

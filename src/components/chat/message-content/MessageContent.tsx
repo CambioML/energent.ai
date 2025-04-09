@@ -32,7 +32,7 @@ export function MessageContent({ content, isBot }: MessageContentProps) {
     <div className="space-y-2">
       {/* Optional header indicating AI is using tools */}
       {parsedContents.some(c => c.type === 'tool_use') && (
-        <div className="flex items-center gap-2 text-xs text-primary mb-2 pb-2 border-b">
+        <div className="flex items-center gap-2 text-xs mb-2 pb-2">
           <BrainCircuit size={14} />
           <span>AI is using tools to complete this task</span>
         </div>
