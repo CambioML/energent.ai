@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.9.4",
@@ -50,6 +52,8 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.21.0",
     "@radix-ui/react-toast": "^1.2.6",
     "@shadcn/ui": "^0.0.4",
@@ -65,8 +69,11 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "framer-motion": "^12.5.0",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
     "lucide-react": "^0.483.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "shadcn": "^2.4.0-canary.17",
     "tailwindcss": "^4.0.15",
     "typescript": "~5.7.2",
