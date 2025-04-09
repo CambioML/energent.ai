@@ -96,7 +96,7 @@ export function MessageItem({ message, onFeedback }: MessageItemProps) {
     >
       {message.isBot && (
         <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-primary text-primary-foreground">
+          <AvatarFallback className="bg-muted text-muted-foreground">
             <Bot size={16} />
           </AvatarFallback>
         </Avatar>
@@ -149,9 +149,10 @@ export function MessageItem({ message, onFeedback }: MessageItemProps) {
             className={cn(
               "px-4 py-2 rounded-lg",
               message.isBot
-                ? "p-4 bg-muted text-foreground rounded-tl-none w-fit"
-                : "bg-primary text-primary-foreground rounded-tr-none ml-auto"
+                ? "p-4 text-foreground rounded-tl-none w-fit"
+                : "text-foreground rounded-tr-none ml-auto"
             )}
+            style={{ backgroundImage: message.isBot ? 'var(--blue-gradient)' : 'var(--blue-gradient-reversed)' }}
           >
             <MessageContent content={message.content} isBot={message.isBot} />
             

@@ -37,7 +37,7 @@ export default function Screen() {
       animate={{ opacity: 1 }}
       className="h-full w-full"
     >
-      <Card className="h-full flex flex-col overflow-hidden bg-transparent py-0 shadow-xs">
+      <Card className="h-full flex flex-col overflow-hidden py-0 shadow-xs">
         {status === AgentStatus.Starting ? (
           <div className="h-full flex items-center justify-center bg-muted/20">
             <div className="text-center p-8">

@@ -87,7 +87,8 @@ export default function Sidebar() {
         initial="collapsed"
         animate={isExpanded ? "expanded" : "collapsed"}
         variants={sidebarVariants}
-        className="fixed left-0 top-workspace h-workspace bg-card border-r z-10 overflow-hidden shadow-sm"
+        className="fixed left-0 top-workspace h-workspace border-r z-10 overflow-hidden shadow-sm bg-card"
+        style={{ backgroundImage: 'var(--blue-gradient)' }}
       >
         <div className="flex flex-col h-workspace pt-2 overflow-auto">
           {/* Section Content */}
