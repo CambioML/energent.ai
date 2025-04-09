@@ -19,7 +19,7 @@ interface UploadedFile extends File {
 }
 
 // Allowed file extensions from the API
-const ALLOWED_EXTENSIONS = ["pdf", "doc", "docx", "txt", "png", "jpg", "jpeg"];
+const ALLOWED_EXTENSIONS = ["pdf", "doc", "docx", "txt", "png", "jpg", "jpeg", "csv"];
 // Max file size from the API (10MB)
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -60,6 +60,7 @@ export const UploadSection = () => {
       "image/jpeg": [".jpg", ".jpeg"],
       "application/pdf": [".pdf"],
       "text/plain": [".txt"],
+      "text/csv": [".csv"],
       "application/msword": [".doc"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
     },
@@ -189,7 +190,7 @@ export const UploadSection = () => {
                   : "Drag & drop files here or click to browse"}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG (max 10MB)
+                Supported formats: PDF, DOC, DOCX, CSV, TXT, PNG, JPG, JPEG (max 10MB)
               </p>
               <Button className="gap-2">
                 <Plus size={16} />
