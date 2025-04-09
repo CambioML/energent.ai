@@ -190,7 +190,7 @@ export const UploadSection = () => {
                   : "Drag & drop files here or click to browse"}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG (max 10MB)
+                Supported formats: PDF, DOC, DOCX, CSV, TXT, PNG, JPG, JPEG (max 10MB)
               </p>
               <Button className="gap-2">
                 <Plus size={16} />
